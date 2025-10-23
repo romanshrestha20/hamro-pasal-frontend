@@ -19,6 +19,10 @@ export const loginUser = (payload: LoginPayload) =>
 export const registerUser = (payload: RegisterPayload) =>
   apiRequest<{ token: string; user: User }>("post", "/auth/register", payload);
 
+export const logoutUser = () =>
+  apiRequest<void>("post", "/auth/logout");
+
+
 export const getCurrentUser = () =>
   apiRequest<User>("get", "/auth/me");
 
