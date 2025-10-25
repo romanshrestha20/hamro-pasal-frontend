@@ -1,4 +1,4 @@
-import { logoutUser } from "@/lib/userApi";
+import { logoutUser } from "@/lib/authApi";
 import { useRouter } from "next/navigation";
 
 

@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/userApi";
+import { getCurrentUser } from "@/lib/authApi";
 import { User } from "@/types/Users";
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react";

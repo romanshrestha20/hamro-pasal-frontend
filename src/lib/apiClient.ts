@@ -1,11 +1,15 @@
+// hamro-pasal-frontend/src/lib/apiClient.ts
+
 import api from "./axios";
-import { handleApiError } from "./apiErrorHandler";
+import { handleApiError, ApiErrorCode, ApiHandledError } from "./apiErrorHandler";
 
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
   statusCode?: number;
+  errorCode?: ApiErrorCode;
+  fieldErrors?: ApiHandledError["fieldErrors"];
 }
 
 export async function apiRequest<T>(
@@ -17,7 +21,7 @@ export async function apiRequest<T>(
     const response = await api.request<T>({ method, url, data });
     return { success: true, data: response.data };
   } catch (error) {
-    const { message, statusCode } = handleApiError(error);
-    return { success: false, error: message, statusCode };
+    const { message, statusCode, code, fieldErrors } = handleApiError(error);
+    return { success: false, error: message, statusCode, errorCode: code, fieldErrors };
   }
 }
