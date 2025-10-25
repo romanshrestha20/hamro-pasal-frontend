@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { useUser } from "@/hooks/useUser";
 import { useLogout } from "@/hooks/useLogout";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
@@ -10,9 +9,10 @@ import DashboardCard from "@/components/DashboardCard";
 import LogoutButton from "@/components/LogoutButton";
 import Button from "@/components/Button";
 import GuestState from "@/components/GuestState";
+import { useAuth } from "@/lib/auth/useAuth";
 
 const DashboardPage = () => {
-  const { user, loading, error, isAuthenticated } = useUser();
+  const { user, loading, error, isAuthenticated } = useAuth();
   const { handleLogout } = useLogout();
 
   if (!user && loading) {

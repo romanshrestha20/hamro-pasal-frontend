@@ -1,11 +1,27 @@
-interface LoadingStateProps {
-  message: string;
+export default function LoadingState({ message }: { message: string }) {
+  return (
+    <div className="flex items-center justify-center py-3 text-gray-600">
+      <svg
+        className="animate-spin h-5 w-5 text-blue-500 mr-2"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        />
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v8H4z"
+        />
+      </svg>
+      {message}
+    </div>
+  );
 }
-
-const LoadingState = ({ message }: LoadingStateProps) => (
-  <div className="p-8 bg-gray-50 min-h-screen flex items-center justify-center">
-    <div className="text-lg text-gray-600">{message}</div>
-  </div>
-);
-
-export default LoadingState;

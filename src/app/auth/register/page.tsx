@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
-import { registerUser } from "@/lib/userApi";
+
+import { useAuth } from "@/lib/auth/useAuth";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -12,32 +13,18 @@ export default function RegisterPage() {
     lastName: "",
     password: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const { loading, error, register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      const response = await registerUser(formData);
-      if (response?.success) {
-        setMessage("Registration successful!");
-        setError(null);
-        toast.success("Registration successful!");
-        localStorage.setItem("token", response.data?.token ?? "");
-      } else {
-        setError(response?.error || "Invalid credentials");
-        toast.error(response?.error || "Invalid credentials");
-      }
-    } catch (error) {
-      setError("An unexpected error occurred. Please try again.");
-      console.error("Registration failed:", error);
-      toast.error("An unexpected error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    await register(formData, {
+      onSuccess: (user) => {
+        toast.success(`Account created! Welcome, ${user.firstName}!`);
+      },
+      onFailure: (message) => {
+        toast.error(`Registration failed: ${message}`);
+      },
+    });
   };
 
   return (
@@ -101,7 +88,6 @@ export default function RegisterPage() {
         </div>
 
         <div className="mt-3 min-h-[24px]">
-          {message && <p className="text-green-600 text-sm">{message}</p>}
           {error && <p className="text-red-500 text-sm">{error}</p>}
         </div>
 

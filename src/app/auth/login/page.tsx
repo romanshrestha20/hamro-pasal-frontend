@@ -2,42 +2,22 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { loginUser } from "@/lib/userApi";
+import { loginUser } from "@/lib/authApi";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { GoogleLoginButton } from "@/components/GoogleLoginButton";
+import { useAuth } from "@/lib/auth/useAuth";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const { login, loading, error } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      const response = await loginUser(formData);
-      if (response?.success) {
-        setError(null);
-        toast.success("Login successful!");
-        localStorage.setItem("token", response.data?.token ?? "");
-        router.push("/dashboard");
-      } else {
-        setError(response?.error || "Invalid credentials");
-        toast.error(response?.error || "Invalid credentials");
-      }
-    } catch (error) {
-      setError("An unexpected error occurred. Please try again.");
-      console.error("Login failed:", error);
-      toast.error("An unexpected error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    await login(formData);
   };
 
   return (
@@ -101,6 +81,21 @@ export default function LoginPage() {
             Register here
           </Link>
         </p>
+        <div>
+          <hr className="my-6 border-gray-300 dark:border-gray-700" />
+          <p className="text-center text-gray-500 dark:text-gray-400 mb-4">
+            Or login with
+          </p>
+        </div>
+
+        <GoogleLoginButton
+          onSuccess={(user) => {
+            console.log("Google login successful:", user);
+          }}
+          onFailure={(error) => {
+            console.error("Google login failed:", error);
+          }}
+        />
       </motion.form>
     </div>
   );
