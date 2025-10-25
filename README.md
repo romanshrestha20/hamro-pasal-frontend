@@ -1,12 +1,12 @@
-# 🛍️ Hamro Pasal - Frontend
+# Hamro Pasal - Frontend
 
 A modern, production-ready e-commerce frontend built with Next.js 15, featuring complete authentication flows (email/password + Google OAuth + password reset), modular component architecture, and enterprise-grade error handling.
 
 ---
 
-## ✨ Features
+## Features
 
-### 🔐 Complete Authentication System
+### Complete Authentication System
 
 - **Email/Password Authentication**
   - User registration with validation
@@ -24,7 +24,7 @@ A modern, production-ready e-commerce frontend built with Next.js 15, featuring 
   - Typed credential response
   - Seamless token exchange
 
-### 📧 Email Integration
+### Email Integration
 
 - **Password Reset Emails**
   - Nodemailer SMTP integration (Gmail)
@@ -33,7 +33,7 @@ A modern, production-ready e-commerce frontend built with Next.js 15, featuring 
   - 1-hour token expiry
   - Confirmation emails
 
-### 🧩 Modular Components
+### Modular Components
 
 - **Reusable Auth Components**
   - `<LoginForm />` - Embeddable login form
@@ -43,7 +43,7 @@ A modern, production-ready e-commerce frontend built with Next.js 15, featuring 
   - Props-based customization
   - Can be used in modals, sidebars, dashboards
 
-### 🎨 Modern UI/UX
+### Modern UI/UX
 
 - Responsive design with Tailwind CSS 4
 - Smooth animations with Framer Motion
@@ -60,7 +60,7 @@ A modern, production-ready e-commerce frontend built with Next.js 15, featuring 
 - Custom error handling system
 - Strict null checks
 
-### 🚀 Performance Optimized
+### Performance Optimized
 
 - Next.js 15 with Turbopack
 - Server and client components
@@ -70,7 +70,7 @@ A modern, production-ready e-commerce frontend built with Next.js 15, featuring 
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category         | Technology                |
 | ---------------- | ------------------------- |
@@ -88,7 +88,7 @@ A modern, production-ready e-commerce frontend built with Next.js 15, featuring 
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 hamro-pasal-frontend/
@@ -154,7 +154,7 @@ hamro-pasal-frontend/
 
 ---
 
-## ⚙️ Setup & Installation
+## Setup & Installation
 
 ### Prerequisites
 
@@ -201,7 +201,7 @@ hamro-pasal-frontend/
 
 ---
 
-## 🚀 Available Scripts
+## Available Scripts
 
 | Command         | Description                             |
 | --------------- | --------------------------------------- |
@@ -212,7 +212,7 @@ hamro-pasal-frontend/
 
 ---
 
-## 🔐 Authentication System
+## Authentication System
 
 ### Complete Auth Flow
 
@@ -224,7 +224,7 @@ The application includes a full authentication system with multiple flows:
 - Password change for authenticated users
 - Session management with auto-refresh
 
-#### 2. **Password Reset Flow** 🆕
+#### 2. **Password Reset Flow** 
 - **Forgot Password**: Request reset link via email
 - **Email Delivery**: Secure token sent to user's email
 - **Reset Password**: Verify token and set new password
@@ -286,9 +286,9 @@ const response = await resetPassword({
 
 ---
 
-## 🧩 Modular Components
+## Modular Components
 
-### Reusable Auth Components 🆕
+### Reusable Auth Components 
 
 The authentication UI is now fully modular and reusable. You can embed login/register forms anywhere in your app!
 
@@ -381,7 +381,7 @@ function Dashboard() {
 }
 ```
 
-📚 **Full documentation**: See [AUTH_COMPONENTS_USAGE.md](./AUTH_COMPONENTS_USAGE.md)
+**Full documentation**: See [AUTH_COMPONENTS_USAGE.md](./AUTH_COMPONENTS_USAGE.md)
 
 ---
 
@@ -476,7 +476,7 @@ if (!response.success) {
 
 ---
 
-## 🎨 UI Components
+## UI Components
 
 ### Key Components
 
@@ -540,7 +540,7 @@ const deleted = await apiRequest("delete", "/users/123");
 
 ---
 
-## 🧪 Type Safety
+## Type Safety
 
 ### User Type
 
@@ -579,7 +579,7 @@ interface GoogleAuthPayload {
 
 ---
 
-## 🎯 Best Practices
+## Best Practices
 
 1. **Type Safety** - Always use TypeScript types and interfaces
 2. **Error Handling** - Use the error handling system for consistent UX
@@ -591,7 +591,7 @@ interface GoogleAuthPayload {
 
 ---
 
-## 🔒 Security Features
+## Security Features
 
 - HTTP-only cookies for auth tokens
 - Secure flag in production
@@ -603,7 +603,7 @@ interface GoogleAuthPayload {
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
 ### Build for Production
 
@@ -637,7 +637,7 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_production_google_client_id
 
 ---
 
-## 📝 Learn More
+## Learn More
 
 ### Documentation
 
@@ -658,9 +658,9 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_production_google_client_id
 
 ---
 
-## 🎯 Implementation Highlights
+## Implementation Highlights
 
-### ✅ Completed Features
+### Completed Features
 
 - [x] Dual-mode authentication (cookie + header)
 - [x] Google OAuth 2.0 integration
@@ -675,7 +675,7 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_production_google_client_id
 - [x] Protected routes
 - [x] Auto session refresh
 
-### 🚀 Key Benefits
+### Key Benefits
 
 - **90% code reduction** in auth pages (modular components)
 - **Reusable forms** - Embed login/register anywhere
@@ -696,13 +696,13 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_production_google_client_id
 
 ---
 
-## 📄 License
+## License
 
 This project is private and proprietary.
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Roman Shrestha**
 
@@ -710,7 +710,7 @@ This project is private and proprietary.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Next.js team for the amazing framework
 - Vercel for hosting and deployment tools
