@@ -52,7 +52,7 @@ A modern, production-ready e-commerce frontend built with Next.js 15, featuring 
 - Lucide icons
 - Loading states & error boundaries
 
-### 🛡️ Type-Safe Architecture
+### Type-Safe Architecture
 
 - Full TypeScript coverage
 - Zod schema validation
@@ -419,7 +419,7 @@ const result = await googleAuth(credentialResponse, {
 
 ---
 
-## 🛡️ Error Handling
+## Error Handling
 
 ### Error Codes
 
@@ -686,7 +686,7 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_production_google_client_id
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -718,4 +718,4 @@ This project is private and proprietary.
 
 ---
 
-**Happy Coding! 🚀**
+**Happy Coding!❤️**
