@@ -18,6 +18,15 @@ export interface GoogleAuthPayload {
     token: string;
 }
 
+export interface ForgotPasswordPayload {
+    email: string;
+}
+
+export interface ResetPasswordPayload {
+    token: string;
+    newPassword: string;
+}
+
 export const googleAuth = (payload: GoogleAuthPayload) =>
     apiRequest<{ token: string; user: User }>("post", "/auth/google", payload)
         .then((response) => {
@@ -38,3 +47,9 @@ export const logoutUser = () =>
 
 export const getCurrentUser = () =>
     apiRequest<User>("get", "/auth/me");
+
+export const forgotPassword = (payload: ForgotPasswordPayload) =>
+    apiRequest<{ message: string }>("post", "/auth/forgot-password", payload);
+
+export const resetPassword = (payload: ResetPasswordPayload) =>
+    apiRequest<{ message: string }>("post", "/auth/reset-password", payload);

@@ -58,6 +58,15 @@ export default function LoginPage() {
             required
             className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+
+          <div className="text-right">
+            <Link
+              href="/auth/forgot-password"
+              className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Forgot password?
+            </Link>
+          </div>
         </div>
 
         {error && (
