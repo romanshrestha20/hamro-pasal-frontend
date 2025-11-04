@@ -1,12 +1,4 @@
-I'll create a comprehensive GitHub repository description for your Hamro Pasal project. Let me first gather more information about the project structure: 
 
-Read [](file:///Users/romanshrestha/Desktop/project/hamro-pasal/hamro-pasal-backend/package.json)
-
-Read [](file:///Users/romanshrestha/Desktop/project/hamro-pasal/hamro-pasal-backend/README.md#1-1), lines 1 to 100
-
-Based on my comprehensive review of your project, here's a professional GitHub repository description and README:
-
----
 
 ## 🛍️ Hamro Pasal - Full-Stack E-Commerce Platform
 
