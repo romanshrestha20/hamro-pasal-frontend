@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 :root {
+  --brand: #111827;
+    --font-geist-sans: 'Geist Sans', -apple-system, BlinkMachineSystemFont, 'Segoe UI', Roboto, Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   --background: #ffffff;
   --foreground: #171717;
 }
