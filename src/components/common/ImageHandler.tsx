@@ -1,17 +1,17 @@
 import Image from "next/image";
 import React from "react";
 
-interface ImageHandlerProps {
-  src?: string | null;
-  alt: string;
-  width?: number;
-  height?: number;
-  fill?: boolean;
-  className?: string;
-  priority?: boolean;
-  fallbackIcon?: React.ReactNode;
-  fallbackText?: string;
-}
+ interface ImageHandlerProps {
+   src?: string | null;
+   alt: string;
+   width?: number;
+   height?: number;
+   fill?: boolean;
+   className?: string;
+   priority?: boolean;
+   fallbackIcon?: React.ReactNode;
+   fallbackText?: string;
+ }
 
 /**
  * ImageHandler Component
@@ -43,6 +43,11 @@ export const ImageHandler: React.FC<ImageHandlerProps> = ({
 
   // If we have a valid image, render Next.js Image
   if (validSrc) {
+    // For local backend images, use unoptimized to avoid Next.js image optimization issues
+    const isLocalBackend =
+      validSrc.includes("localhost:4000") ||
+      validSrc.includes("127.0.0.1:4000");
+
     return (
       <Image
         src={validSrc}
@@ -52,6 +57,7 @@ export const ImageHandler: React.FC<ImageHandlerProps> = ({
         fill={fill}
         className={className}
         priority={priority}
+        unoptimized={isLocalBackend}
       />
     );
   }
@@ -67,7 +73,7 @@ export const ImageHandler: React.FC<ImageHandlerProps> = ({
   return (
     <div className={`${fallbackClassName} ${fallbackStyle}`.trim()}>
       {fallbackIcon || (
-        <span className="text-gray-400 text-sm">{fallbackText}</span>
+        <span className="text-sm text-gray-400">{fallbackText}</span>
       )}
     </div>
   );
