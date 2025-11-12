@@ -1,10 +1,10 @@
+"use client";
 import { ProductCard } from "./ProductCard";
 import type { Product } from "@/lib/types";
 
 interface ProductGridProps {
   products: Product[];
   onAddToCart: (product: Product) => void;
-  onWishList: (product: Product) => void;
   columns?: 2 | 3 | 4 | 5;
   className?: string;
   emptyMessage?: string;
@@ -20,15 +20,14 @@ const gridColsMap = {
 export function ProductGrid({
   products,
   onAddToCart,
-  onWishList,
   columns = 4,
   className = "",
   emptyMessage = "No products found",
 }: ProductGridProps) {
   if (!products || products.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">{emptyMessage}</p>
+      <div className="py-12 text-center">
+        <p className="text-lg text-gray-500">{emptyMessage}</p>
       </div>
     );
   }
@@ -37,10 +36,10 @@ export function ProductGrid({
     <div className={`grid ${gridColsMap[columns]} gap-6 ${className}`}>
       {products.map((product) => (
         <ProductCard
+          onWishList={() => {}}
           key={product.id}
           product={product}
           onAddToCart={() => onAddToCart(product)}
-          onWishList={() => onWishList(product)}
         />
       ))}
     </div>

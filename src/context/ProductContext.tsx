@@ -11,26 +11,41 @@ import {
   searchProducts as apiSearchProducts,
   fetchProductsByCategory as apiFetchProductsByCategory,
   fetchCategories as apiFetchCategories,
-} from "@/lib/api/product";
+} from "@/lib/api/product/index";
 
+// Define a typed result for product actions 
 export type ProductResult =
   | { success: true; data: Product | Product[] | Category[] }
   | { success: false; error: string };
 
+  // Define the context type with state and actions for products and categories
 export interface ProductContextType {
   products: Product[];
   categories: Category[];
   loading: boolean;
   error: string | null;
   fetchAllProducts: (signal?: AbortSignal) => Promise<void>;
-  getProductById: (productId: string, signal?: AbortSignal) => Promise<ProductResult>;
-  updateProduct: (productId: string, updatedData: Partial<Product>) => Promise<ProductResult>;
+  getProductById: (
+    productId: string,
+    signal?: AbortSignal
+  ) => Promise<ProductResult>;
+  updateProduct: (
+    productId: string,
+    updatedData: Partial<Product>
+  ) => Promise<ProductResult>;
   deleteProduct: (productId: string) => Promise<ProductResult>;
-  searchProducts: (query: string, signal?: AbortSignal) => Promise<ProductResult>;
-  fetchProductsByCategory: (categoryId: string, signal?: AbortSignal) => Promise<ProductResult>;
+  searchProducts: (
+    query: string,
+    signal?: AbortSignal
+  ) => Promise<ProductResult>;
+  fetchProductsByCategory: (
+    categoryId: string,
+    signal?: AbortSignal
+  ) => Promise<ProductResult>;
   fetchCategories: (signal?: AbortSignal) => Promise<ProductResult>;
 }
 
+// Create the ProductContext with default values to ensure type safety
 export const ProductContext = createContext<ProductContextType>({
   products: [],
   categories: [],
@@ -41,11 +56,18 @@ export const ProductContext = createContext<ProductContextType>({
   updateProduct: async () => ({ success: false, error: "Not implemented" }),
   deleteProduct: async () => ({ success: false, error: "Not implemented" }),
   searchProducts: async () => ({ success: false, error: "Not implemented" }),
-  fetchProductsByCategory: async () => ({ success: false, error: "Not implemented" }),
+  fetchProductsByCategory: async () => ({
+    success: false,
+    error: "Not implemented",
+  }),
   fetchCategories: async () => ({ success: false, error: "Not implemented" }),
 });
 
-export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
+export const ProductProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -70,46 +92,84 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     }
   };
 
-  const fetchCategories = async (signal?: AbortSignal): Promise<ProductResult> => {
+  const fetchCategories = async (
+    signal?: AbortSignal
+  ): Promise<ProductResult> => {
     try {
       const response = await apiFetchCategories({ signal });
       if (response.success && Array.isArray(response.data)) {
         setCategories(response.data);
         return { success: true, data: response.data };
       }
-      return { success: false, error: response.error || "Failed to fetch categories" };
+      return {
+        success: false,
+        error: response.error || "Failed to fetch categories",
+      };
     } catch (err: any) {
-      return { success: false, error: err.message || "Failed to fetch categories" };
+      return {
+        success: false,
+        error: err.message || "Failed to fetch categories",
+      };
     }
   };
 
-  const getProductById = async (productId: string, signal?: AbortSignal): Promise<ProductResult> => {
+  const getProductById = async (
+    productId: string,
+    signal?: AbortSignal
+  ): Promise<ProductResult> => {
     try {
       const response = await apiGetProductById(productId, { signal });
-      if (response.success && response.data) return { success: true, data: response.data };
-      return { success: false, error: response.error || "Failed to fetch product" };
-    } catch {
-      return { success: false, error: "Failed to fetch product" };
+      if (response.success && response.data)
+        return { success: true, data: response.data };
+      return {
+        success: false,
+        error: response.error || "Failed to fetch product",
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err.message || "Failed to fetch product",
+      };
     }
   };
 
-  const fetchProductsByCategory = async (categoryId: string, signal?: AbortSignal): Promise<ProductResult> => {
+  const fetchProductsByCategory = async (
+    categoryId: string,
+    signal?: AbortSignal
+  ): Promise<ProductResult> => {
     try {
       const response = await apiFetchProductsByCategory(categoryId, { signal });
-      if (response.success && Array.isArray(response.data)) return { success: true, data: response.data };
-      return { success: false, error: response.error || "Failed to fetch products by category" };
+      if (response.success && Array.isArray(response.data))
+        return { success: true, data: response.data };
+      return {
+        success: false,
+        error: response.error || "Failed to fetch products by category",
+      };
     } catch (err: any) {
-      return { success: false, error: err.message || "Failed to fetch products by category" };
+      return {
+        success: false,
+        error: err.message || "Failed to fetch products by category",
+      };
     }
   };
 
-  const searchProducts = async (query: string, signal?: AbortSignal): Promise<ProductResult> => {
+  const searchProducts = async (
+    query: string,
+    signal?: AbortSignal
+  ): Promise<ProductResult> => {
     try {
       const response = await apiSearchProducts(query, { signal });
-      if (response.success && Array.isArray(response.data)) return { success: true, data: response.data };
-      return { success: false, error: response.error || "Failed to search products" };
+      if (response.success && Array.isArray(response.data))
+        return { success: true, data: response.data };
+      return {
+        success: false,
+        error: response.error || "Failed to search products",
+      };
     } catch (err: any) {
-      return { success: false, error: err.message || "Failed to search products" };
+      return {
+        success: false,
+        error: err.message || "Failed to search products",
+      };
     }
   };
 
@@ -121,13 +181,21 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
       const response = await apiUpdateProduct(productId, updatedData);
       if (response.success && response.data) {
         const updated = response.data as Product; // single product expected
-        setProducts((prev) => prev.map((p) => (p.id === productId ? updated : p)));
+        setProducts((prev) =>
+          prev.map((p) => (p.id === productId ? updated : p))
+        );
         toast.success("Product updated successfully!");
         return { success: true, data: updated };
       }
-      return { success: false, error: response.error || "Failed to update product" };
+      return {
+        success: false,
+        error: response.error || "Failed to update product",
+      };
     } catch {
-      return { success: false, error: "An error occurred while updating product" };
+      return {
+        success: false,
+        error: "An error occurred while updating product",
+      };
     }
   };
 
@@ -139,9 +207,15 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
         toast.success("Product deleted successfully!");
         return { success: true, data: [] };
       }
-      return { success: false, error: response.error || "Failed to delete product" };
+      return {
+        success: false,
+        error: response.error || "Failed to delete product",
+      };
     } catch {
-      return { success: false, error: "An error occurred while deleting product" };
+      return {
+        success: false,
+        error: "An error occurred while deleting product",
+      };
     }
   };
 

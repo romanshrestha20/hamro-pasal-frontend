@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Heart, ShoppingCart, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui";
 import type { Product } from "@/lib/types";
+import { useFavorite } from "@/context/FavoriteContext";
 
 interface ProductDetailProps {
   product: Product;
@@ -19,6 +20,8 @@ export function ProductDetail({
 }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const { toggleFavorite, isFavoritedLocal } = useFavorite();
+  const isFavorited = isFavoritedLocal(product.id);
 
   const price =
     typeof product.price === "string"
@@ -43,11 +46,11 @@ export function ProductDetail({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
       {/* Image Gallery */}
       <div className="space-y-4">
         {/* Main Image */}
-        <div className="relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden">
+        <div className="relative w-full overflow-hidden bg-gray-100 rounded-lg aspect-square">
           <Image
             src={images[selectedImage]}
             alt={product.name}
@@ -115,11 +118,11 @@ export function ProductDetail({
         </div>
 
         {/* Price */}
-        <div className="border-t border-b py-4">
+        <div className="py-4 border-t border-b">
           <div className="text-3xl font-bold text-gray-900">
             ${price.toFixed(2)}
           </div>
-          <div className="mt-2 flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-2">
             {product.stock > 0 ? (
               <>
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -140,21 +143,21 @@ export function ProductDetail({
 
         {/* Description */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+          <h2 className="mb-2 text-lg font-semibold text-gray-900">
             Description
           </h2>
-          <p className="text-gray-700 leading-relaxed">{product.description}</p>
+          <p className="leading-relaxed text-gray-700">{product.description}</p>
         </div>
 
         {/* Tags */}
         {product.tags && product.tags.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Tags</h3>
+            <h3 className="mb-2 text-sm font-semibold text-gray-900">Tags</h3>
             <div className="flex flex-wrap gap-2">
               {product.tags.map((tag, idx) => (
                 <span
                   key={idx}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-700"
+                  className="inline-flex items-center px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-full"
                 >
                   {tag}
                 </span>
@@ -166,14 +169,14 @@ export function ProductDetail({
         {/* Categories */}
         {product.categories && product.categories.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">
+            <h3 className="mb-2 text-sm font-semibold text-gray-900">
               Categories
             </h3>
             <div className="flex flex-wrap gap-2">
               {product.categories.map((category) => (
                 <span
                   key={category.id}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700"
+                  className="inline-flex items-center px-3 py-1 text-sm text-blue-700 bg-blue-100 rounded-full"
                 >
                   {category.name}
                 </span>
@@ -185,7 +188,7 @@ export function ProductDetail({
         {/* Quantity Selector */}
         {product.stock > 0 && (
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">
+            <h3 className="mb-2 text-sm font-semibold text-gray-900">
               Quantity
             </h3>
             <div className="flex items-center gap-3">
@@ -197,7 +200,7 @@ export function ProductDetail({
               >
                 <Minus className="w-4 h-4" />
               </button>
-              <span className="text-lg font-medium min-w-12 text-center">
+              <span className="text-lg font-medium text-center min-w-12">
                 {quantity}
               </span>
               <button
@@ -225,7 +228,10 @@ export function ProductDetail({
           </Button>
           <Button
             variant="outline"
-            onClick={() => onWishList(product)}
+            onClick={() => {
+              toggleFavorite(product.id);
+              onWishList(product);
+            }}
             label="Add to Wishlist"
             aria-label="Add to wishlist"
           >

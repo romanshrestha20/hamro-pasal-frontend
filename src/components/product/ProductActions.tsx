@@ -1,16 +1,16 @@
 import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useFavorite } from "@/context/FavoriteContext";
 
 interface ProductActionsProps {
   onAddToCart: () => void;
-  onWishList: () => void;
+
   className?: string;
   showLabels?: boolean;
 }
 
 export function ProductActions({
   onAddToCart,
-  onWishList,
   className = "",
   showLabels = false,
 }: ProductActionsProps) {
@@ -25,14 +25,8 @@ export function ProductActions({
         <ShoppingCart className="w-4 h-4" />
         {showLabels && <span className="ml-2">Add to Cart</span>}
       </Button>
-      <Button
-        variant="outline"
-        onClick={onWishList}
-        label="Add to Wishlist"
-        aria-label="Add to wishlist"
-      >
-        <Heart className="w-4 h-4" />
-      </Button>
     </div>
   );
 }
+
+

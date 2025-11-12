@@ -1,8 +1,10 @@
-import { apiRequest, type ApiResponse } from "./client";
+import { apiRequest, type ApiResponse } from "@/lib/api";
 import type { Product, Category } from "@/lib/types";
 
+// Request options type for optional signal and params
 type RequestOptions = { signal?: AbortSignal; params?: Record<string, unknown> };
 
+// Helper to extract config from options if provided
 const withConfig = (options?: RequestOptions) =>
     options ? { signal: options.signal, params: options.params } : undefined;
 
