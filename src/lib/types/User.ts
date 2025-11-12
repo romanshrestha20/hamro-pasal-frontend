@@ -10,3 +10,12 @@ export interface User {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface UserUpdatePayload {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  profilePicture?: string;
+}

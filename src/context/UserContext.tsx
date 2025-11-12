@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import type { User } from "@/lib/types";
-import { updateUser, deleteUser, getAllUsers } from "@/lib/api";
+import { updateUser, deleteUser, getAllUsers } from "@/lib/api/auth/index";
 
 export type UserResult =
   | { success: true; data: User | User[] }

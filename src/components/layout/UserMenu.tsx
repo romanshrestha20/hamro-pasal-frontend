@@ -22,7 +22,7 @@ export function UserMenu() {
     return (
       <Link
         href="/login"
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        className="px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
       >
         Sign In
       </Link>
@@ -37,7 +37,7 @@ export function UserMenu() {
       trigger={
         <div className="flex items-center gap-2 cursor-pointer">
           <UserAvatar user={u} size="sm" />
-          <span className="hidden sm:inline text-sm text-gray-700 font-medium">
+          <span className="hidden text-sm font-medium text-gray-700 sm:inline">
             {displayName}
           </span>
         </div>
@@ -110,6 +110,26 @@ export function UserMenu() {
         }
       >
         My Orders
+      </DropdownItem>
+      <DropdownItem
+        href="/favorites"
+        icon={
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        }
+      >
+        Favorites
       </DropdownItem>
 
       <DropdownDivider />

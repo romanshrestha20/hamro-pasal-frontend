@@ -12,9 +12,10 @@ import {
   loginUser,
   logoutUser,
   registerUser,
-} from "@/lib/api/auth";
-import type { User } from "@/lib/types";
-import type { LoginPayload, RegisterPayload } from "@/lib/api/auth";
+} from "@/lib/api/auth/index";
+import { updateUser as apiUpdateUser } from "@/lib/api/auth/index";
+import type { User, UserUpdatePayload } from "@/lib/types";
+import type { LoginPayload, RegisterPayload } from "@/lib/api/auth/index";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { CredentialResponse } from "@react-oauth/google";
@@ -50,6 +51,12 @@ interface AuthContextType {
     credentialResponse: CredentialResponse,
     options?: AuthActionOptions
   ) => Promise<AuthResult>;
+  refreshUser: () => Promise<void>;
+  updateUser: (
+    userId: string,
+    updatedData: UserUpdatePayload,
+    options?: AuthActionOptions
+  ) => Promise<AuthResult>;
 }
 
 // Create the AuthContext with default values
@@ -68,6 +75,11 @@ export const AuthContext = createContext<AuthContextType>({
   }),
   logout: async () => {},
   googleAuth: async () => ({
+    success: false,
+    error: "Auth provider not initialized",
+  }),
+  refreshUser: async () => {},
+  updateUser: async () => ({
     success: false,
     error: "Auth provider not initialized",
   }),
@@ -151,6 +163,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return {
         success: false,
         error: "Something went wrong. Please try again.",
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update function to modify existing user accounts
+  const updateUser = async (
+    userId: string,
+    updatedData: UserUpdatePayload,
+    options?: AuthActionOptions
+  ): Promise<AuthResult> => {
+    setLoading(true);
+    setError(null);
+    const prev = user;
+    try {
+      const response = await apiUpdateUser(userId, updatedData);
+
+      if (response.success && response.data) {
+        const updatedUser = response.data;
+        // update local state so app reflects new user data
+        setUser(updatedUser);
+        setIsAuthenticated(true);
+        toast.success("Account updated successfully!");
+        options?.onSuccess?.(updatedUser);
+        return { success: true, user: updatedUser };
+      } else {
+        const message = response.error || "Update failed";
+        setError(message);
+        toast.error(message);
+        options?.onFailure?.(message);
+        return { success: false, error: message };
+      }
+    } catch (err) {
+      console.error("Update error:", err);
+      setUser(prev)
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.";
+      setError(message);
+      toast.error(message);
+      options?.onFailure?.(message);
+      return {
+        success: false,
+        error: message,
       };
     } finally {
       setLoading(false);
@@ -269,6 +327,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         error,
         logout,
         googleAuth,
+        refreshUser,
+        updateUser,
       }}
     >
       {children}

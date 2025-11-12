@@ -1,5 +1,5 @@
 import type { User } from "@/lib/types";
-import { apiRequest } from "./client";
+import { apiRequest } from '@/lib/api/client';
 
 
 export interface LoginPayload {
