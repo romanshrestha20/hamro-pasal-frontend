@@ -25,6 +25,7 @@ const ProfileDetails = ({ user, className = "" }: ProfileDetailsProps) => {
       {user?.email && <DetailRow label="Email" value={user.email} />}
       {user?.phone && <DetailRow label="Phone" value={user.phone} />}
       {user?.address && <DetailRow label="Address" value={user.address} />}
+      
     </div>
   );
 };

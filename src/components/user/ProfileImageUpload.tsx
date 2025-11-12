@@ -4,6 +4,7 @@ interface ProfileImageUploadProps {
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   acceptedFormats?: string;
   disabled?: boolean;
+  className?: string;
 }
 
 const ProfileImageUpload = ({
@@ -12,9 +13,10 @@ const ProfileImageUpload = ({
   onFileSelect,
   acceptedFormats = "image/*",
   disabled = false,
+  className = "",
 }: ProfileImageUploadProps) => {
   return (
-    <div className="flex items-center gap-2">
+    <div className={`flex items-center gap-2 ${className}`}>
       <label
         className={`inline-flex items-center px-3 py-1.5 rounded-md bg-gray-800 text-white text-sm cursor-pointer hover:bg-gray-700 transition-colors ${
           uploading || disabled ? "opacity-60 cursor-not-allowed" : ""

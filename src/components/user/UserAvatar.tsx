@@ -6,8 +6,7 @@ interface UserAvatarProps {
   user?: {
     firstName?: string;
     name?: string;
-    image?: string | null;
-    avatarUrl?: string | null;
+    profilePicture?: string | null;
   };
   size?: "sm" | "md" | "lg" | "xl";
   showFallbackText?: boolean;
@@ -32,10 +31,11 @@ export default function UserAvatar({
   }
 
   const name = user.name || user.firstName || "User";
-  const imageSrc = user.image || user.avatarUrl || null;
+  const imageSrc = user.profilePicture || null;
 
   return (
     <ProfileAvatar
+      uploading={uploading}
       src={imageSrc}
       alt={name}
       fallbackText={showFallbackText ? name.charAt(0).toUpperCase() : ""}

@@ -1,6 +1,8 @@
 import ImageHandler from "../common/ImageHandler";
+import { User } from "@/lib/types";
 
 interface ProfileAvatarProps {
+  user: User;
   src?: string | null;
   alt: string;
   fallbackText?: string;
@@ -21,9 +23,11 @@ const ProfileAvatar = ({
   fallbackText,
   size = "md",
   uploading = false,
+  user,
 }: ProfileAvatarProps) => {
   const sizeClass = sizeClasses[size];
-  const initial = alt?.[0]?.toUpperCase() || "U";
+  const initial =
+    alt?.[0]?.toUpperCase() || user.firstName?.[0]?.toUpperCase() || "?";
 
   return (
     <div
@@ -38,15 +42,15 @@ const ProfileAvatar = ({
           fallbackText={fallbackText || "No Image Available"}
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-gray-500 font-semibold">
+        <div className="flex items-center justify-center w-full h-full font-semibold text-gray-500">
           {initial}
         </div>
       )}
 
       {/* Loading Overlay */}
       {uploading && (
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-          <span className="text-white text-xs font-medium">Uploading...</span>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <span className="text-xs font-medium text-white">Uploading...</span>
         </div>
       )}
     </div>

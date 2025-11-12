@@ -1,7 +1,7 @@
 
 
 import { useEffect, useState } from "react";
-import { imageUpload } from "@/lib/api";
+import { imageUpload } from "@/lib/api/auth";
 import toast from "react-hot-toast";
 
 interface UseProfileImageOptions {
