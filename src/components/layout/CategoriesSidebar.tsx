@@ -77,7 +77,8 @@ export default function CategoriesSidebar({
             className="space-y-2"
           >
             {/* All Products */}
-            <button
+            <Button
+              label="All Product"
               type="button"
               onClick={() => onCategorySelect(null)}
               disabled={loading}
@@ -91,7 +92,7 @@ export default function CategoriesSidebar({
             >
               All Products
               <span className="float-right text-sm">{totalCount}</span>
-            </button>
+            </Button>
 
             {/* Individual categories */}
             {categories.map((category) => {
@@ -102,7 +103,6 @@ export default function CategoriesSidebar({
                   key={category.id}
                   onClick={() => onCategorySelect(category.id)}
                   role="option"
-                  aria-selected={isSelected ? "true" : "false"}
                   className={`w-full text-left px-3 py-2 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-bright-blue-500 ${
                     isSelected
                       ? "bg-bright-blue-100 dark:bg-bright-blue-900/40 text-bright-blue-700 dark:text-bright-blue-400 font-medium border border-bright-blue-300 dark:border-bright-blue-700"

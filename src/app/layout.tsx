@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ProductProvider } from "@/context/ProductContext";
 import { Toaster } from "react-hot-toast";
 import Navbar from "@/components/layout/Navbar";
+import { FavoriteProvider } from "@/context/FavoriteContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
+        suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <GoogleOAuthProvider
@@ -37,9 +39,11 @@ export default function RootLayout({
         >
           <AuthProvider>
             <ProductProvider>
-              <Toaster position="top-right" />
-              <Navbar />
-              {children}
+              <FavoriteProvider>
+                <Toaster position="top-right" />
+                <Navbar />
+                {children}
+              </FavoriteProvider>
             </ProductProvider>
           </AuthProvider>
         </GoogleOAuthProvider>

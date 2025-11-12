@@ -5,21 +5,25 @@ import { UserProfile } from "@/components/user";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { Button } from "@/components/ui/Button";
+import UserForm from "@/components/forms/UserForm";
+
 export default function ProfilePage() {
-  const { user, loading, isAuthenticated, logout } = useAuth();
+  const { user, loading, isAuthenticated, logout, refreshUser } = useAuth();
   const router = useRouter();
 
-  const handleLogout = async () => {
-    await logout();
-    router.push("/login");
+  const handleProfileImageUpdated = async (newUrl: string) => {
+    console.log("Profile image updated:", newUrl);
+    // Refresh user data to show the new profile picture
+    await refreshUser();
   };
 
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="space-y-4 text-center">
+          <div className="w-12 h-12 mx-auto border-b-2 border-gray-900 rounded-full animate-spin"></div>
           <p className="text-gray-600">Loading your profile...</p>
         </div>
       </div>
@@ -29,8 +33,8 @@ export default function ProfilePage() {
   // Not authenticated
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="max-w-md w-full text-center space-y-6">
+      <div className="flex items-center justify-center min-h-screen px-4">
+        <div className="w-full max-w-md space-y-6 text-center">
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-gray-900">
               Profile Not Found
@@ -39,16 +43,16 @@ export default function ProfilePage() {
               Please sign in to view your profile.
             </p>
           </div>
-          <div className="flex gap-4 justify-center">
+          <div className="flex justify-center gap-4">
             <Link
               href="/login"
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
             >
               Sign In
             </Link>
             <Link
               href="/"
-              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-6 py-2 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50"
             >
               Go Home
             </Link>
@@ -61,41 +65,34 @@ export default function ProfilePage() {
   // Authenticated - show profile
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-4xl px-4 py-12 mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">My Profile</h1>
           <p className="text-gray-600">
             Manage your account settings and preferences
           </p>
         </div>
 
         {/* Profile Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-          <UserProfile user={user} editable={true} avatarSize="lg" />
+        <div className="p-8 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <UserProfile
+            user={user}
+            editable={true}
+            avatarSize="lg"
+            onProfileUpdated={handleProfileImageUpdated}
+            rightTitle="Profile details"
+            rightSubtitle="Basic information about your account"
+          />
 
           {/* Action Buttons */}
-          <div className="mt-8 pt-6 border-t border-gray-200 flex gap-4">
-            <Link
-              href="/dashboard"
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Go to Dashboard
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Sign Out
-            </button>
-          </div>
         </div>
 
         {/* Additional Info Cards */}
-        <div className="grid md:grid-cols-2 gap-6 mt-6">
+        <div className="grid gap-6 mt-6 md:grid-cols-2">
           {/* Account Info */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">
               Account Information
             </h2>
             <div className="space-y-3 text-sm">
@@ -129,26 +126,26 @@ export default function ProfilePage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">
               Quick Actions
             </h2>
             <div className="space-y-2">
               <Link
                 href="/orders"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                className="block px-4 py-2 text-sm text-gray-700 transition-colors rounded-md hover:bg-gray-50"
               >
                 View Orders
               </Link>
               <Link
                 href="/favorites"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                className="block px-4 py-2 text-sm text-gray-700 transition-colors rounded-md hover:bg-gray-50"
               >
                 My Favorites
               </Link>
               <Link
                 href="/cart"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                className="block px-4 py-2 text-sm text-gray-700 transition-colors rounded-md hover:bg-gray-50"
               >
                 Shopping Cart
               </Link>

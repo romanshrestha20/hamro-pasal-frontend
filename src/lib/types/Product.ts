@@ -28,3 +28,39 @@ export interface Product {
   images?: Image[];
   categories?: Category[];
 }
+
+export interface Favorite {
+  id: string;
+  userId: string;
+  productId: string;
+  product: Product;
+  createdAt: string;
+
+}
+
+export interface Cart {
+  id: string;
+  userId: string;
+  seesionId?: string;
+  createdAt: string;
+  updatedAt: string;
+
+}
+
+export interface CartItem {
+  id: string;
+  cartId: string;
+  productId: string;
+  quantity: number;
+  unitPrice: string | number;
+  currency: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// export interface Order {
+
+// }
+// export interface OrderItem {
+
+// }
