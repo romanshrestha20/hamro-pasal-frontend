@@ -13,7 +13,7 @@ export interface ApiResponse<T> {
 }
 
 export async function apiRequest<T>(
-  method: "get" | "post" | "put" | "delete",
+  method: "get" | "post" | "put" | "delete" | "patch",
   url: string,
   data?: unknown,
   config?: AxiosRequestConfig

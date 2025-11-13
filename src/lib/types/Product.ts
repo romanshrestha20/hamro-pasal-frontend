@@ -44,6 +44,7 @@ export interface Cart {
   seesionId?: string;
   createdAt: string;
   updatedAt: string;
+  items?: CartItem[];
 
 }
 
