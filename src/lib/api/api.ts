@@ -13,3 +13,28 @@ export interface ApiResponse<T = unknown> {
 }
 
 export default api;
+
+// Helper to set/unset Authorization header for the axios instance
+export const setAuthToken = (token: string | null) => {
+  if (token) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common["Authorization"];
+  }
+};
+
+// Request interceptor: attach token from localStorage if available (client-side only)
+api.interceptors.request.use((config) => {
+  try {
+    if (typeof window !== "undefined") {
+      const token = window.localStorage.getItem("hp_auth_token");
+      if (token) {
+        config.headers = config.headers ?? {};
+        (config.headers as any)["Authorization"] = `Bearer ${token}`;
+      }
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return config;
+});
