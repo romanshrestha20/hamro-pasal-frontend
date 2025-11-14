@@ -30,18 +30,18 @@ export const addItemToCart = (
 
 export const updateCartItem = (
     itemId: string,
-    updatedData: Partial<CartItem>,
+    payload: { productId: string; quantity: number },
     options?: RequestOptions
-) => apiRequest<CartItem>("patch", `/cart/item/${itemId}`, updatedData, withConfig(options));
+) => apiRequest<CartItem>("patch", `/cart/item/${itemId}`, payload, withConfig(options));
 
 /**
  * Remove item from cart
  */
 
 export const deleteCartItem = (
-    itemId: string,
+    productId: string,
     options?: RequestOptions
-) => apiRequest<CartItem>("delete", `/cart/item/${itemId}`, undefined, withConfig(options));
+) => apiRequest<CartItem>("delete", `/cart/item/${productId}`, { productId }, withConfig(options));
 
 /**
  * Delete entire cart

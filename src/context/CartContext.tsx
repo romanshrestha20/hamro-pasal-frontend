@@ -1,8 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import type { Cart, CartItem } from "@/lib/types";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
+import type { Cart, CartItem, Product } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
+import { useProductContext } from "@/context/ProductContext";
 
 import {
   getUserCart,
@@ -12,7 +20,6 @@ import {
   deleteCart,
 } from "@/lib/api/product/cart";
 
-// Result type for cart operations
 export type CartResult =
   | { success: true; data?: Cart | CartItem | CartItem[] }
   | { success: false; error: string };
@@ -20,6 +27,8 @@ export type CartResult =
 export interface CartContextType {
   cart: Cart | null;
   items: CartItem[];
+  totalItems: number;
+  subtotal: number;
   loading: boolean;
   error: string | null;
 
@@ -30,132 +39,291 @@ export interface CartContextType {
   clearCart: () => Promise<CartResult>;
 }
 
-// Create the CartContext with default null value
 export const CartContext = createContext<CartContextType | null>(null);
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth() as { user: { id?: string } | null };
+  const { user, loading: authLoading } = useAuth(); // IMPORTANT FIX
+  const { products } = useProductContext();
 
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Extract items from cart safely
-  const items: CartItem[] = cart?.items ?? [];
+  const LOCAL_CART_KEY = "hp_local_cart_v1";
 
-  // ---- Fetch full cart ----
-  const fetchUserCart = async (signal?: AbortSignal): Promise<CartResult> => {
+  const loadLocalCart = (): Cart | null => {
+    try {
+      const raw = localStorage.getItem(LOCAL_CART_KEY);
+      return raw ? (JSON.parse(raw) as Cart) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const saveLocalCart = (c: Cart | null) => {
+    try {
+      if (!c) localStorage.removeItem(LOCAL_CART_KEY);
+      else localStorage.setItem(LOCAL_CART_KEY, JSON.stringify(c));
+    } catch {}
+  };
+
+  const items = cart?.items ?? [];
+
+  // ---------------------------
+  // Fetch cart for logged-in/guest
+  // ---------------------------
+  const fetchUserCart = useCallback(async (): Promise<CartResult> => {
     if (!user?.id) {
-      setCart(null);
+      const local = loadLocalCart();
+      setCart(local);
       setLoading(false);
-      return { success: false, error: "Not authenticated" };
+      return { success: true, data: local || undefined };
     }
 
     try {
       setLoading(true);
       setError(null);
-      const response = await getUserCart(user.id, { signal });
+
+      const response = await getUserCart(user.id);
       if (response.success && response.data) {
-        setCart(response.data as Cart);
-        return { success: true, data: response.data as Cart };
+        // Unwrap nested backend response if double-wrapped
+        const raw = response.data as unknown as {
+          success?: boolean;
+          data?: Cart;
+        };
+        const cartData =
+          raw?.data && (raw.data as Cart).items
+            ? raw.data
+            : (raw as unknown as Cart);
+        console.log(
+          "[CartContext] fetchUserCart raw=",
+          raw,
+          "cartData=",
+          cartData
+        );
+        setCart(cartData);
+        return { success: true, data: cartData };
       }
 
-      const message = response.error || "Failed to fetch cart";
-      setError(message);
-      return { success: false, error: message };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to fetch cart";
-      setError(message);
-      return { success: false, error: message };
+      setError(response.error || "Failed to fetch cart");
+      return {
+        success: false,
+        error: response.error || "Failed to fetch cart",
+      };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to fetch cart";
+      setError(msg);
+      return { success: false, error: msg };
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    // fetch cart when user becomes available
-    if (!user) return;
-    let abort = false;
-    (async () => {
-      if (abort) return;
-      await fetchUserCart();
-    })();
-    return () => {
-      abort = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  // ---- Mutations always refresh full cart ----
+  // ---------------------------
+  // AUTH GATE: Wait until auth finished
+  // ---------------------------
+  useEffect(() => {
+    if (authLoading) return;
+    fetchUserCart();
+  }, [authLoading, fetchUserCart]);
+
+  // ---------------------------
+  // Merge guest cart → server cart
+  // ---------------------------
+  const mergedOnceRef = useRef(false);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user?.id) return;
+    if (mergedOnceRef.current) return;
+
+    const local = loadLocalCart();
+    if (!local?.items?.length) {
+      mergedOnceRef.current = true;
+      return;
+    }
+
+    (async () => {
+      try {
+        await Promise.all(
+          (local.items ?? []).map((it) =>
+            addItemToCart({
+              productId: it.productId,
+              quantity: it.quantity,
+            })
+          )
+        );
+        saveLocalCart(null);
+        await fetchUserCart();
+      } finally {
+        mergedOnceRef.current = true;
+      }
+    })();
+  }, [authLoading, user?.id]);
+
+  // ---------------------------
+  // MUTATIONS
+  // ---------------------------
+
   const addToCart = async (
     productId: string,
-    quantity: number = 1
+    quantity = 1
   ): Promise<CartResult> => {
-    if (!user?.id) return { success: false, error: "Not authenticated" };
-    try {
-      const response = await addItemToCart({ productId, quantity });
-      if (response.success) {
-        await fetchUserCart();
-        return { success: true, data: response.data };
+    if (!user?.id) {
+      try {
+        const local = loadLocalCart() || {
+          id: `local-${Date.now()}`,
+          userId: "",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          items: [],
+        };
+
+        if (!local.items) local.items = [];
+        const existing = local.items.find((it) => it.productId === productId);
+        if (existing) {
+          existing.quantity += quantity;
+          existing.updatedAt = new Date().toISOString();
+        } else {
+          const prod = products.find((p) => p.id === productId);
+          const price = prod ? Number(prod.price) : 0;
+
+          const newItem: CartItem = {
+            id: `local-item-${productId}`,
+            cartId: local.id,
+            productId,
+            quantity,
+            unitPrice: price,
+            currency: "USD",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            product: prod as Product,
+          };
+
+          local.items.push(newItem);
+        }
+
+        local.updatedAt = new Date().toISOString();
+        setCart(local);
+        saveLocalCart(local);
+
+        return { success: true, data: local };
+      } catch {
+        return { success: false, error: "Failed to add item" };
       }
-      return { success: false, error: response.error || "Failed to add to cart" };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to add to cart";
-      return { success: false, error: message };
     }
+
+    // Authenticated
+    const response = await addItemToCart({ productId, quantity });
+    if (response.success) {
+      await fetchUserCart();
+      return { success: true, data: response.data };
+    }
+    return { success: false, error: response.error || "Failed to add item" };
   };
 
-  const updateQty = async (itemId: string, quantity: number): Promise<CartResult> => {
-    if (!user?.id) return { success: false, error: "Not authenticated" };
-    try {
-      const response = await updateCartItem(itemId, { quantity });
-      if (response.success) {
-        await fetchUserCart();
-        return { success: true, data: response.data };
-      }
-      return { success: false, error: response.error || "Failed to update item" };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to update item";
-      return { success: false, error: message };
+  const updateQty = async (
+    itemId: string,
+    quantity: number
+  ): Promise<CartResult> => {
+    if (!user?.id) {
+      const local = loadLocalCart();
+      if (!local) return { success: false, error: "No local cart" };
+
+      if (!local.items) local.items = [];
+      const item = local.items.find((it) => it.id === itemId);
+      if (!item) return { success: false, error: "Item not found" };
+
+      item.quantity = quantity;
+      item.updatedAt = new Date().toISOString();
+      local.updatedAt = new Date().toISOString();
+
+      setCart(local);
+      saveLocalCart(local);
+
+      return { success: true, data: item };
     }
+
+    // Authenticated
+    const item = items.find((it) => it.id === itemId);
+    if (!item) return { success: false, error: "Item not found" };
+    const response = await updateCartItem(itemId, {
+      productId: item.productId,
+      quantity,
+    });
+    if (response.success) {
+      await fetchUserCart();
+      return { success: true, data: response.data };
+    }
+
+    return { success: false, error: response.error || "Failed to update item" };
   };
 
   const removeItem = async (itemId: string): Promise<CartResult> => {
-    if (!user?.id) return { success: false, error: "Not authenticated" };
-    try {
-      const response = await deleteCartItem(itemId);
-      if (response.success) {
-        await fetchUserCart();
-        return { success: true, data: response.data };
-      }
-      return { success: false, error: response.error || "Failed to remove item" };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to remove item";
-      return { success: false, error: message };
+    if (!user?.id) {
+      const local = loadLocalCart();
+      if (!local) return { success: false, error: "No local cart" };
+
+      local.items = (local.items ?? []).filter((it) => it.id !== itemId);
+      local.updatedAt = new Date().toISOString();
+
+      setCart(local);
+      saveLocalCart(local);
+
+      return { success: true };
     }
+
+    const item = items.find((it) => it.id === itemId);
+    if (!item) return { success: false, error: "Item not found" };
+    const response = await deleteCartItem(item.productId);
+    if (response.success) {
+      await fetchUserCart();
+      return { success: true };
+    }
+
+    return { success: false, error: response.error || "Failed to remove item" };
   };
 
   const clearCart = async (): Promise<CartResult> => {
-    if (!user?.id) return { success: false, error: "Not authenticated" };
-    if (!cart?.id) return { success: false, error: "No cart to clear" };
-    try {
-      const response = await deleteCart(cart.id);
-      if (response.success) {
-        await fetchUserCart();
-        return { success: true };
-      }
-      return { success: false, error: response.error || "Failed to clear cart" };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to clear cart";
-      return { success: false, error: message };
+    if (!user?.id) {
+      saveLocalCart(null);
+      setCart(null);
+      return { success: true };
     }
+
+    if (!cart?.id) return { success: false, error: "No cart to clear" };
+
+    const response = await deleteCart(cart.id);
+    if (response.success) {
+      await fetchUserCart();
+      return { success: true };
+    }
+
+    return { success: false, error: response.error || "Failed to clear cart" };
   };
+
+  const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
+
+  const subtotal = items.reduce((sum, item) => {
+    const maybeUnit = (item as unknown as { unitPrice?: number | string })
+      .unitPrice;
+    const rawPrice = maybeUnit !== undefined ? maybeUnit : item.product?.price;
+    const price =
+      typeof rawPrice === "string"
+        ? parseFloat(rawPrice)
+        : typeof rawPrice === "number"
+          ? rawPrice
+          : 0;
+    return sum + item.quantity * price;
+  }, 0);
 
   return (
     <CartContext.Provider
       value={{
         cart,
         items,
+        totalItems,
+        subtotal,
         loading,
         error,
         fetchUserCart,
