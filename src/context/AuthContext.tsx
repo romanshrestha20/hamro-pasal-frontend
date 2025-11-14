@@ -13,6 +13,7 @@ import {
   logoutUser,
   registerUser,
 } from "@/lib/api/auth/index";
+import { setAuthToken } from "@/lib/api/api";
 import { updateUser as apiUpdateUser } from "@/lib/api/auth/index";
 import type { User, UserUpdatePayload } from "@/lib/types";
 import type { LoginPayload, RegisterPayload } from "@/lib/api/auth/index";
@@ -105,6 +106,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (response.success && response.data?.user) {
         const user = response.data.user;
+        const token = (response.data as any).token as string | undefined;
+        if (token) {
+          try {
+            if (typeof window !== "undefined") {
+              window.localStorage.setItem("hp_auth_token", token);
+            }
+          } catch {}
+          setAuthToken(token);
+        }
         toast.success("Login successful!");
         await refreshUser(); //  update global auth state
         router.push("/dashboard");
@@ -143,6 +153,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (response.success && response.data?.user) {
         const user = response.data.user;
+        const token = (response.data as any).token as string | undefined;
+        if (token) {
+          try {
+            if (typeof window !== "undefined") {
+              window.localStorage.setItem("hp_auth_token", token);
+            }
+          } catch {}
+          setAuthToken(token);
+        }
         toast.success("Account created successfully!");
         await refreshUser(); // log in immediately
         router.push("/dashboard");
@@ -198,7 +217,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (err) {
       console.error("Update error:", err);
-      setUser(prev)
+      setUser(prev);
       const message =
         err instanceof Error
           ? err.message
@@ -222,6 +241,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await logoutUser();
       setUser(null);
       setIsAuthenticated(false);
+      try {
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem("hp_auth_token");
+        }
+      } catch {}
+      setAuthToken(null);
       toast.success("Logged out successfully!");
       router.push("/login");
     } catch (err) {
@@ -258,6 +283,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (result?.success && result.user) {
+        const token = (result as any).token as string | undefined;
+        if (token) {
+          try {
+            if (typeof window !== "undefined") {
+              window.localStorage.setItem("hp_auth_token", token);
+            }
+          } catch {}
+          setAuthToken(token);
+        }
         toast.success("Login successful!");
         await refreshUser();
         router.push("/dashboard");
@@ -307,7 +341,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // IIFE to refresh user if component is still mounted
     (async () => {
-      if (isMounted) await refreshUser();
+      if (isMounted) {
+        try {
+          if (typeof window !== "undefined") {
+            const token = window.localStorage.getItem("hp_auth_token");
+            if (token) setAuthToken(token);
+          }
+        } catch {}
+        await refreshUser();
+      }
     })();
 
     // Cleanup function to set isMounted to false on unmount
