@@ -32,13 +32,19 @@ export async function handleGoogleAuth({
         }
 
         const user = response.data.user;
+        const backendToken = (response.data as any).token as string | undefined;
+        if (backendToken && typeof window !== "undefined") {
+            try {
+                window.localStorage.setItem("hp_auth_token", backendToken);
+            } catch { }
+        }
 
         // Optionally call user-defined success handler
         onSuccess?.(user);
         // Optional redirect after login
         onRedirect?.("/dashboard");
 
-        return { success: true, user } as const;
+        return { success: true, user, token: backendToken } as const;
     } catch (error) {
         console.error("Google authentication error:", error);
         onFailure?.(error);
