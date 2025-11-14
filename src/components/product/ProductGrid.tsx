@@ -5,6 +5,7 @@ import type { Product } from "@/lib/types";
 interface ProductGridProps {
   products: Product[];
   onAddToCart: (product: Product) => void;
+  onWishList?: (product: Product) => void;
   columns?: 2 | 3 | 4 | 5;
   className?: string;
   emptyMessage?: string;
@@ -20,6 +21,7 @@ const gridColsMap = {
 export function ProductGrid({
   products,
   onAddToCart,
+  onWishList,
   columns = 4,
   className = "",
   emptyMessage = "No products found",
@@ -36,7 +38,7 @@ export function ProductGrid({
     <div className={`grid ${gridColsMap[columns]} gap-6 ${className}`}>
       {products.map((product) => (
         <ProductCard
-          onWishList={() => {}}
+          onWishList={() => onWishList?.(product)}
           key={product.id}
           product={product}
           onAddToCart={() => onAddToCart(product)}

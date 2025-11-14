@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+export const dynamic = "force-dynamic";
+
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ProductGrid, ProductList } from "@/components/product";
 import { useProductContext } from "@/context/ProductContext";
 import { Search, Grid3x3, List, X } from "lucide-react";
@@ -12,10 +14,14 @@ import CategoriesSidebar from "@/components/layout/CategoriesSidebar";
 import ProductFilters, {
   FilterState,
 } from "@/components/filters/ProductFilters";
+import { useCart } from "@/context/CartContext";
+import { useFavorite } from "@/context/FavoriteContext";
 
 export default function ProductsPage() {
   const { products, categories, loading, error } = useProductContext();
   const { fetchProductsByCategory, fetchAllProducts } = useProductContext();
+  const { addToCart } = useCart();
+  const { addFavorite } = useFavorite();
 
   const [filters, setFilters] = useState<FilterState>({
     categoryId: null,
@@ -23,22 +29,56 @@ export default function ProductsPage() {
     search: "",
   });
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get("q") || "";
+    } catch {
+      return "";
+    }
+  });
+
+  useEffect(() => {
+    const onPop = () => {
+      try {
+        const q = new URLSearchParams(window.location.search).get("q") || "";
+        setSearchQuery(q);
+      } catch {
+        setSearchQuery("");
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Derive search query from URL params
-  const searchQuery = searchParams.get("q") || "";
+  // searchQuery is read from window location in an effect
 
-  const handleAddToCart = (product: Product) => {
-    // TODO: Integrate with cart context when available
-    toast.success(`${product.name} added to cart!`);
+  const handleAddToCart = async (product: Product) => {
+    try {
+      const res = await addToCart(product.id, 1);
+      if (res.success) {
+        toast.success(`${product.name} added to cart!`);
+      } else {
+        toast.error(res.error || "Failed to add to cart");
+      }
+    } catch {
+      toast.error("Failed to add to cart");
+    }
   };
 
-  const handleWishList = (product: Product) => {
-    // TODO: Implement wishlist functionality
-    toast.success(`${product.name} added to wishlist!`);
+  const handleWishList = async (product: Product) => {
+    try {
+      const res = await addFavorite(product.id);
+      if (res.success) {
+        toast.success(`${product.name} added to wishlist!`);
+      } else {
+        toast.error(res.error || "Failed to add to cart");
+      }
+    } catch {
+      toast.error("Failed to add to cart");
+    }
   };
 
   const clearSearch = () => {

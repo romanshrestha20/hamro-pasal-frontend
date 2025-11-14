@@ -1,0 +1,21 @@
+:root {
+  --brand: 230 90% 55%;
+  --brand-dark: 230 90% 40%;
+  --brand-light: 230 90% 70%;
+
+  --background: 0 0% 100%;
+  --foreground: 224 71.4% 4.1%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 224 71.4% 4.1%;
+
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+}

@@ -2,7 +2,7 @@ import ImageHandler from "../common/ImageHandler";
 import { User } from "@/lib/types";
 
 interface ProfileAvatarProps {
-  user: User;
+  user?: User | null;
   src?: string | null;
   alt: string;
   fallbackText?: string;
@@ -27,7 +27,7 @@ const ProfileAvatar = ({
 }: ProfileAvatarProps) => {
   const sizeClass = sizeClasses[size];
   const initial =
-    alt?.[0]?.toUpperCase() || user.firstName?.[0]?.toUpperCase() || "?";
+    alt?.[0]?.toUpperCase() || user?.firstName?.[0]?.toUpperCase() || "?";
 
   return (
     <div

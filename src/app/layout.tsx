@@ -4,9 +4,10 @@ import "./globals.css";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProductProvider } from "@/context/ProductContext";
+import { FavoriteProvider } from "@/context/FavoriteContext";
+import { CartProvider } from "@/context/CartContext"; // ⬅️ add this
 import { Toaster } from "react-hot-toast";
 import Navbar from "@/components/layout/Navbar";
-import { FavoriteProvider } from "@/context/FavoriteContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,13 +24,9 @@ export const metadata: Metadata = {
   description: "Your one-stop shop for everything you need!",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -40,9 +37,13 @@ export default function RootLayout({
           <AuthProvider>
             <ProductProvider>
               <FavoriteProvider>
-                <Toaster position="top-right" />
-                <Navbar />
-                {children}
+                <CartProvider>
+                  <Toaster position="top-center" />
+                  <Navbar />
+                  <main className="container flex-1 px-4 py-6 mx-auto"></main>
+                  {children}
+                  <main />
+                </CartProvider>
               </FavoriteProvider>
             </ProductProvider>
           </AuthProvider>
