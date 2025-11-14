@@ -57,6 +57,7 @@ export interface CartItem {
   currency: string;
   createdAt: string;
   updatedAt: string;
+  product: Product;
 }
 
 // export interface Order {

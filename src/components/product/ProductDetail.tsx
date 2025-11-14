@@ -6,11 +6,12 @@ import { Heart, ShoppingCart, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui";
 import type { Product } from "@/lib/types";
 import { useFavorite } from "@/context/FavoriteContext";
+import { useCart } from "@/context/CartContext";
 
 interface ProductDetailProps {
   product: Product;
-  onAddToCart: (product: Product, quantity: number) => void;
-  onWishList: (product: Product) => void;
+  onAddToCart?: (product: Product, quantity: number) => void;
+  onWishList?: (product: Product) => void;
 }
 
 export function ProductDetail({
@@ -18,10 +19,10 @@ export function ProductDetail({
   onAddToCart,
   onWishList,
 }: ProductDetailProps) {
+  const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const { toggleFavorite, isFavoritedLocal } = useFavorite();
-  const isFavorited = isFavoritedLocal(product.id);
+  const { toggleFavorite } = useFavorite();
 
   const price =
     typeof product.price === "string"
@@ -41,8 +42,10 @@ export function ProductDetail({
     }
   };
 
-  const handleAddToCart = () => {
-    onAddToCart(product, quantity);
+  const handleAddToCart = async () => {
+    if (onAddToCart) return onAddToCart(product, quantity);
+    // fallback to cart context
+    await addToCart(product.id, quantity);
   };
 
   return (
@@ -230,7 +233,7 @@ export function ProductDetail({
             variant="outline"
             onClick={() => {
               toggleFavorite(product.id);
-              onWishList(product);
+              onWishList?.(product);
             }}
             label="Add to Wishlist"
             aria-label="Add to wishlist"

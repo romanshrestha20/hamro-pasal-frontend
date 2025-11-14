@@ -2,24 +2,24 @@ import Image from "next/image";
 import type { Product } from "@/lib/types";
 
 interface ProductListProps {
-  products: Product[];
-  onAddToCart: (product: Product) => void;
-  onWishList: (product: Product) => void;
+  products?: Product[];
+  onAddToCart?: (product: Product) => void;
+  onWishList?: (product: Product) => void;
   className?: string;
   emptyMessage?: string;
 }
 
 export function ProductList({
-  products,
-  onAddToCart,
-  onWishList,
+  products = [],
+  onAddToCart = () => {},
+  onWishList = () => {},
   className = "",
   emptyMessage = "No products found",
 }: ProductListProps) {
   if (!products || products.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">{emptyMessage}</p>
+      <div className="py-12 text-center">
+        <p className="text-lg text-gray-500">{emptyMessage}</p>
       </div>
     );
   }
@@ -39,7 +39,7 @@ export function ProductList({
         return (
           <div
             key={product.id}
-            className="flex gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow bg-white"
+            className="flex gap-4 p-4 transition-shadow bg-white border rounded-lg hover:shadow-md"
           >
             <div className="relative w-32 h-32 shrink-0">
               <Image
@@ -54,7 +54,7 @@ export function ProductList({
                 {product.name}
               </h3>
               {product.description && (
-                <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                <p className="mt-1 text-sm text-gray-600 line-clamp-2">
                   {product.description}
                 </p>
               )}
@@ -73,13 +73,13 @@ export function ProductList({
               <button
                 onClick={() => onAddToCart(product)}
                 disabled={product.stock === 0}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 Add to Cart
               </button>
               <button
                 onClick={() => onWishList(product)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-gray-700 transition-colors border border-gray-300 rounded-md hover:bg-gray-50"
               >
                 Wishlist
               </button>
