@@ -3,10 +3,10 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
-      <header className="mb-8 flex items-center justify-between"></header>
+    <main className="max-w-5xl px-6 py-12 mx-auto">
+      <header className="flex items-center justify-between mb-8"></header>
 
-      <section className="rounded-2xl border p-8">
+      <section className="p-8 border rounded-2xl">
         <h2 className="mb-2 text-xl font-semibold">Welcome 👋</h2>
         <div className="text-gray-500">
           <p className="mb-4">

@@ -10,6 +10,8 @@ import { ProductActions } from "./ProductActions";
 import type { Product } from "@/lib/types";
 import { Button } from "../ui";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "react-hot-toast/headless";
 
 interface ProductCardProps {
   product: Product;
@@ -24,6 +26,7 @@ export function ProductCard({
   showActions = true,
   onWishList,
 }: ProductCardProps) {
+  const { isAuthenticated } = useAuth();
   const { toggleFavorite, isFavoritedLocal } = useFavorite();
   const { addToCart } = useCart();
   const isFavorited = isFavoritedLocal(product.id);
@@ -36,13 +39,20 @@ export function ProductCard({
 
   const imageUrl =
     product.image || product.images?.[0]?.url || "/placeholder-product.png";
-  const price = typeof product.price === "string" ? parseFloat(product.price) : product.price;
+  const price =
+    typeof product.price === "string"
+      ? parseFloat(product.price)
+      : product.price;
 
   /** Handle wishlist toggle (uses global FavoriteContext) */
   const handleToggleFavorite = (e?: React.MouseEvent) => {
     e?.preventDefault(); // Prevent navigation on click from <Link>
     toggleFavorite(product.id);
     try {
+      // need to authenticate user before calling wishlist handler
+      if (!isAuthenticated) {
+        toast.error("User not authenticated");
+      }
       onWishList?.(product);
     } catch {
       // noop
@@ -56,24 +66,30 @@ export function ProductCard({
         <ProductImage imageUrl={imageUrl} altText={product.name} />
 
         {/* Favorite button overlay */}
-        <button
-          type="button"
-          onClick={handleToggleFavorite}
-          aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
-          className="absolute top-3 right-3"
-        >
-          <Heart
-            className={`h-6 w-6 transition ${
-              isFavorited ? "fill-red-500 text-red-500" : "text-gray-400"
-            }`}
-          />
-        </button>
+        {/* {isAuthenticated && ( */}
+          <button
+            type="button"
+            onClick={handleToggleFavorite}
+            aria-label={
+              isFavorited ? "Remove from favorites" : "Add to favorites"
+            }
+            className="absolute top-3 right-3"
+          >
+            <Heart
+              className={`h-6 w-6 transition ${
+                isFavorited ? "fill-red-500 text-red-500" : "text-gray-400"
+              }`}
+            />
+          </button>
+        {/* )} */}
 
         {/* Details */}
         <div className="mt-3">
           <ProductTitle title={product.name} />
           {product.description && (
-            <p className="mt-1 text-sm text-gray-600 line-clamp-2">{product.description}</p>
+            <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+              {product.description}
+            </p>
           )}
           <ProductPrice price={price} />
         </div>
@@ -84,17 +100,6 @@ export function ProductCard({
         <div className="flex gap-2 mt-3">
           {/* prefer a passed handler so pages can override (analytics, toasts), else use cart context */}
           <ProductActions onAddToCart={handleAddToCart} />
-          <Button
-            variant={isFavorited ? "default" : "outline"}
-            onClick={() => handleToggleFavorite()}
-            aria-label={isFavorited ? "Remove from wishlist" : "Add to wishlist"}
-          >
-            <Heart
-              className={`w-5 h-5 ${
-                isFavorited ? "fill-red-500 text-red-500" : "text-gray-500"
-              }`}
-            />
-          </Button>
         </div>
       )}
     </div>
