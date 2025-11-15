@@ -222,42 +222,41 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     return { success: false, error: response.error || "Failed to add item" };
   };
 
-  const updateQty = async (
-    itemId: string,
-    quantity: number
-  ): Promise<CartResult> => {
-    if (!user?.id) {
-      const local = loadLocalCart();
-      if (!local) return { success: false, error: "No local cart" };
+const updateQty = async (
+  itemId: string,
+  quantity: number
+): Promise<CartResult> => {
+  // 1️⃣ Optimistic UI update
+  setCart((prev) => {
+    if (!prev) return prev;
+    return {
+      ...prev,
+      items: prev.items.map((i) => (i.id === itemId ? { ...i, quantity } : i)),
+    };
+  });
 
-      if (!local.items) local.items = [];
-      const item = local.items.find((it) => it.id === itemId);
-      if (!item) return { success: false, error: "Item not found" };
+  // 2️⃣ Sync with server in background
+  const item = items.find((it) => it.id === itemId);
+  if (!item) {
+    return { success: false, error: "Item not found" };
+  }
 
-      item.quantity = quantity;
-      item.updatedAt = new Date().toISOString();
-      local.updatedAt = new Date().toISOString();
+  const response = await updateCartItem(itemId, {
+    productId: item.productId,
+    quantity,
+  });
 
-      setCart(local);
-      saveLocalCart(local);
+  // 3️⃣ Only re-fetch if server-side quantity was modified
+  if (response.success) {
+    // remove fetchUserCart() to prevent UI reloads
+    return { success: true, data: response.data };
+  }
 
-      return { success: true, data: item };
-    }
+  // 4️⃣ Rollback optimistic update on error
+  await fetchUserCart();
+  return { success: false, error: response.error || "Failed to update item" };
+};
 
-    // Authenticated
-    const item = items.find((it) => it.id === itemId);
-    if (!item) return { success: false, error: "Item not found" };
-    const response = await updateCartItem(itemId, {
-      productId: item.productId,
-      quantity,
-    });
-    if (response.success) {
-      await fetchUserCart();
-      return { success: true, data: response.data };
-    }
-
-    return { success: false, error: response.error || "Failed to update item" };
-  };
 
   const removeItem = async (itemId: string): Promise<CartResult> => {
     if (!user?.id) {
@@ -304,18 +303,27 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
 
-  const subtotal = items.reduce((sum, item) => {
-    const maybeUnit = (item as unknown as { unitPrice?: number | string })
-      .unitPrice;
-    const rawPrice = maybeUnit !== undefined ? maybeUnit : item.product?.price;
-    const price =
-      typeof rawPrice === "string"
-        ? parseFloat(rawPrice)
-        : typeof rawPrice === "number"
-          ? rawPrice
-          : 0;
-    return sum + item.quantity * price;
-  }, 0);
+const toNumber = (val: any) => {
+  if (val == null) return 0;
+
+  // Prisma Decimal case
+  if (typeof val === "object" && "toString" in val) {
+    return parseFloat(val.toString());
+  }
+
+  if (typeof val === "string") return parseFloat(val);
+  if (typeof val === "number") return val;
+
+  return 0;
+};
+
+const subtotal = items.reduce((sum, item) => {
+  const price = item.unitPrice
+    ? toNumber(item.unitPrice)
+    : toNumber(item.product?.price);
+
+  return sum + item.quantity * price;
+}, 0);
 
   return (
     <CartContext.Provider
