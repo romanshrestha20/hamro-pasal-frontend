@@ -45,9 +45,7 @@ export function Navbar() {
               onMouseLeave={() => setOpen(false)}
             >
               {/* Trigger */}
-              <button className="flex items-center gap-1 text-gray-700 transition dark:text-gray-300 hover:text-bright-blue-500">
-                Categories <ChevronDown size={16} />
-              </button>
+              <NavbarLink href="#" label="Categories" />
 
               {/* Dropdown */}
               {open && (

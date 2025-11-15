@@ -1,7 +1,3 @@
 "use client";
-
-import { Navbar } from "./Navbar";
-
-export default function NavbarWrapper() {
-  return <Navbar />;
-}
+// Wrapper re-export: use the enhanced Navbar implementation from Navbar.tsx
+export { Navbar as default } from "./Navbar";
