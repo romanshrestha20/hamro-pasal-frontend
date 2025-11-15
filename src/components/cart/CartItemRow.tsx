@@ -53,6 +53,7 @@ export default function CartItemRow({ item }: { item: CartItem }) {
       <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
         <div className="flex items-center gap-2 overflow-hidden bg-white border rounded-md">
           <Button
+            type="button"
             onClick={() => updateQty(item.id, Math.max(1, item.quantity - 1))}
             disabled={loading || item.quantity <= 1}
             aria-label={`Decrease quantity of ${item.product.name}`}
@@ -66,6 +67,7 @@ export default function CartItemRow({ item }: { item: CartItem }) {
           </div>
 
           <Button
+            type="button"
             onClick={() => updateQty(item.id, item.quantity + 1)}
             disabled={loading}
             aria-label={`Increase quantity of ${item.product.name}`}
@@ -80,6 +82,7 @@ export default function CartItemRow({ item }: { item: CartItem }) {
             ${(unitPrice * item.quantity).toFixed(2)}
           </div>
           <Button
+            type="button"
             onClick={() => removeItem(item.id)}
             disabled={loading}
             className="px-2 text-red-600 bg-white hover:text-red-800"

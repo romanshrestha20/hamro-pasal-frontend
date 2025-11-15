@@ -8,6 +8,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = ({
+  type = "button",
   loading,
   label,
   variant = "primary",
@@ -46,6 +47,7 @@ export const Button = ({
       {...props}
       className={`${baseClasses} ${variantClasses} ${props.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       disabled={loading || props.disabled}
+      type={type}
     >
       {loading ? "Loading..." : (children ?? label)}
     </button>
