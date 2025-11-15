@@ -186,11 +186,15 @@ export default function ProductsPage() {
   return (
     <div className="px-4 py-10 mx-auto max-w-7xl">
       {/* Top Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        {/* View mode toggle */}
-        <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+      <div className="flex items-center justify-end gap-4 mb-6">
+        <h2 className="flex-1 mb-2 text-2xl font-bold">Products</h2>
 
-        {/* Filters */}
+        <ViewModeToggle
+          className="shrink-0"
+          mode={viewMode}
+          onChange={setViewMode}
+        />
+
         <ProductFilters
           initialState={{
             categoryId: selectedCategory,
@@ -214,15 +218,14 @@ export default function ProductsPage() {
         }}
       />
 
-      <div className="flex flex-col gap-8 mt-8 lg:flex-row">
-        {/* Sidebar */}
-        <div className="w-full lg:w-64 shrink-0">
+      <div className="flex gap-6">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block">
           <CategoriesSidebar
             selectedCategory={selectedCategory}
-            onCategorySelect={handleCategorySelect}
+            onCategorySelect={setSelectedCategory}
           />
         </div>
-
         {/* Product List / Grid */}
         <div className="flex-1 min-h-[400px]">
           {filteredProducts.length === 0 ? (

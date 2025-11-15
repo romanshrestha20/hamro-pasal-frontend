@@ -4,13 +4,16 @@ import { Grid3x3, List } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 interface Props {
+  className?: string;
   mode: "grid" | "list";
   onChange: (mode: "grid" | "list") => void;
 }
 
-export default function ViewModeToggle({ mode, onChange }: Props) {
+export default function ViewModeToggle({ className, mode, onChange }: Props) {
   return (
-    <div className="flex gap-2 p-1 border rounded-lg bg-soft-lavender-200 dark:bg-gray-800">
+    <div
+      className={`flex gap-2 px-1 rounded-lg bg-soft-lavender-200 dark:bg-gray-800 ${className}`}
+    >
       <Button
         className={mode === "grid" ? "bg-bright-blue-500 text-white" : ""}
         onClick={() => onChange("grid")}

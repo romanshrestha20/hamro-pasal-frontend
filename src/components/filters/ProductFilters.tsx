@@ -48,7 +48,7 @@ export default function ProductFilters({
     }
   };
   return (
-    <div className="flex flex-col w-full gap-4 md:flex-row">
+    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-end">
       {showSidebar && (
         <CategoriesSidebar
           selectedCategory={filters.categoryId}
