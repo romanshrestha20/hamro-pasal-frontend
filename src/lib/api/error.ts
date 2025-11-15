@@ -80,7 +80,6 @@ export const handleApiError = (error: unknown): ApiHandledError => {
 
   // Generic Errors
   if (error instanceof Error) {
-    toast.error(error.message);
     return {
       message: error.message,
       statusCode: 500,
