@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, KeyboardEvent, useState } from "react";
 import { useProductContext } from "@/context/ProductContext";
 import { Button } from "../ui";
 
@@ -13,41 +13,50 @@ interface CategoriesSidebarProps {
 
 export default function CategoriesSidebar({
   selectedCategory = null,
-  onCategorySelect = () => {}, // default no-op
+  onCategorySelect = () => {},
   className = "",
   emptyMessage = "No categories found",
 }: CategoriesSidebarProps) {
+  const [open, setOpen] = useState(false);
   const { categories, products, loading, error } = useProductContext();
 
-  // Build a map of categoryId -> product count (memoized for perf)
+  // Compute product counts
   const { totalCount, countsByCategory } = useMemo(() => {
-    const counts = new Map<string, number>();
+    const map = new Map<string, number>();
     let total = 0;
 
     for (const p of products) {
-      total += 1;
-      const cats = p?.categories;
-      if (!cats || !Array.isArray(cats) || cats.length === 0) {
-        continue;
-      }
-      for (const c of cats) {
+      total++;
+      if (!Array.isArray(p?.categories)) continue;
+      p.categories.forEach((c) => {
         if (c?.id) {
-          counts.set(c.id, (counts.get(c.id) ?? 0) + 1);
+          map.set(c.id, (map.get(c.id) ?? 0) + 1);
         }
-      }
+      });
     }
 
-    return { totalCount: total, countsByCategory: counts };
+    return { totalCount: total, countsByCategory: map };
   }, [products]);
 
-  const filteredProducts = useMemo(() => {
-    if (!selectedCategory) return products;
-    return products.filter((p) =>
-      p.categories?.some((cat) => cat.id === selectedCategory)
-    );
-  }, [products, selectedCategory]);
+  // Keyboard accessibility
+  const handleKey = (e: KeyboardEvent<HTMLDivElement>, id: string | null) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onCategorySelect(id);
+    }
+  };
+
+  const baseItemClasses =
+    "w-full text-left px-3 py-2 rounded-md transition-colors select-none flex items-center justify-between cursor-pointer";
+
+  const selectedClasses =
+    "bg-bright-blue-100 dark:bg-bright-blue-900/40 text-bright-blue-700 dark:text-bright-blue-400 font-medium border border-bright-blue-300 dark:border-bright-blue-700";
+
+  const unselectedClasses =
+    "text-gray-700 dark:text-gray-300 hover:bg-soft-lavender-300 dark:hover:bg-gray-700";
 
   return (
+    
     <aside className={`lg:w-64 shrink-0 ${className}`}>
       <div
         className="sticky p-4 bg-white border rounded-lg shadow-sm top-20 dark:bg-gray-800 border-soft-lavender-500 dark:border-gray-700"
@@ -77,40 +86,41 @@ export default function CategoriesSidebar({
             className="space-y-2"
           >
             {/* All Products */}
-            <Button
-              label="All Product"
-              type="button"
-              onClick={() => onCategorySelect(null)}
-              disabled={loading}
+            <div
               role="option"
-              aria-selected={selectedCategory === null ? "true" : "false"}
-              className={`w-full text-left px-3 py-2 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-bright-blue-500 ${
-                selectedCategory === null
-                  ? "bg-bright-blue-100 dark:bg-bright-blue-900/40 text-bright-blue-700 dark:text-bright-blue-400 font-medium border border-bright-blue-300 dark:border-bright-blue-700"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-soft-lavender-300 dark:hover:bg-gray-700"
+              tabIndex={0}
+              aria-selected={selectedCategory === null}
+              onClick={() => onCategorySelect(null)}
+              onKeyDown={(e) => handleKey(e, null)}
+              className={`${baseItemClasses} ${
+                selectedCategory === null ? selectedClasses : unselectedClasses
               }`}
             >
-              All Products
-              <span className="float-right text-sm">{totalCount}</span>
-            </Button>
+              <span>All Products</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {totalCount}
+              </span>
+            </div>
 
-            {/* Individual categories */}
+            {/* Individual Categories */}
             {categories.map((category) => {
               const count = countsByCategory.get(category.id) ?? 0;
               const isSelected = selectedCategory === category.id;
+
               return (
                 <div
                   key={category.id}
-                  onClick={() => onCategorySelect(category.id)}
                   role="option"
-                  className={`w-full text-left px-3 py-2 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-bright-blue-500 ${
-                    isSelected
-                      ? "bg-bright-blue-100 dark:bg-bright-blue-900/40 text-bright-blue-700 dark:text-bright-blue-400 font-medium border border-bright-blue-300 dark:border-bright-blue-700"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-soft-lavender-300 dark:hover:bg-gray-700"
+                  tabIndex={0}
+                  aria-selected={isSelected}
+                  onClick={() => onCategorySelect(category.id)}
+                  onKeyDown={(e) => handleKey(e, category.id)}
+                  className={`${baseItemClasses} ${
+                    isSelected ? selectedClasses : unselectedClasses
                   }`}
                 >
-                  {category.name}
-                  <span className="float-right text-sm text-gray-500 dark:text-gray-400">
+                  <span>{category.name}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
                     {count}
                   </span>
                 </div>
