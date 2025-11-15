@@ -10,7 +10,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && isAuthenticated) router.push("/dashboard");
+    if (!loading && isAuthenticated) router.push("/products");
   }, [isAuthenticated, loading, router]);
 
   return <>{children}</>;
