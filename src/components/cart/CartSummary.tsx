@@ -8,12 +8,13 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function CartSummary() {
-  const { totalItems, subtotal, clearCart, loading } = useCart();
+  const { totalItems, subtotal, loading } = useCart();
   const { isAuthenticated } = useAuth(); // assuming useAuth hook exists
   const [promo, setPromo] = useState("");
 
   const discount = 0; // placeholder for promo logic
   const total = Math.max(0, subtotal - discount);
+  const formatCurrency = (v: number) => v.toFixed(2);
 
   return (
     <aside className="w-full p-6 bg-white border rounded-lg shadow-lg">
@@ -28,7 +29,7 @@ export default function CartSummary() {
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Subtotal</span>
           <span className="font-medium text-gray-900">
-            ${subtotal.toFixed(2)}
+            ${formatCurrency(subtotal)}
           </span>
         </div>
 
@@ -55,7 +56,7 @@ export default function CartSummary() {
               value={promo}
               onChange={(e) => setPromo(e.target.value)}
               placeholder="Enter code"
-              className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-bright-blue-300"
+              className="flex-1 px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-bright-blue-300"
             />
             <Button
               onClick={() => {
