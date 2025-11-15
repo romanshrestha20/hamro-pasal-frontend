@@ -117,7 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         toast.success("Login successful!");
         await refreshUser(); //  update global auth state
-        router.push("/dashboard");
+        router.push("/products");
         options?.onSuccess?.(user);
         return { success: true, user };
       } else {
@@ -164,7 +164,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         toast.success("Account created successfully!");
         await refreshUser(); // log in immediately
-        router.push("/dashboard");
+        router.push("/products");
         options?.onSuccess?.(user);
         return { success: true, user };
       } else {
@@ -294,7 +294,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         toast.success("Login successful!");
         await refreshUser();
-        router.push("/dashboard");
+        router.push("/products");
         return { success: true, user: result.user };
       } else {
         const message = "Google login failed";

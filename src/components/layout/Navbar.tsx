@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { UserMenu } from "./UserMenu";
 import { NavbarSearch } from "./NavbarSearch";
-import NavbarLink from "./NavbarLink";
+import {NavbarLink} from "./NavbarLink";
 
-export default function Navbar() {
+export  function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-white border-b shadow-sm dark:bg-gray-900 border-soft-lavender-500 dark:border-gray-800">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
