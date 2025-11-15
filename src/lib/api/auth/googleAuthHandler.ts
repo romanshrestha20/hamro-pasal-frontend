@@ -42,7 +42,7 @@ export async function handleGoogleAuth({
         // Optionally call user-defined success handler
         onSuccess?.(user);
         // Optional redirect after login
-        onRedirect?.("/dashboard");
+        onRedirect?.("/products");
 
         return { success: true, user, token: backendToken } as const;
     } catch (error) {
