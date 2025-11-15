@@ -75,7 +75,7 @@ export function UserMenu() {
             My Profile
           </DropdownItem>
 
-          <DropdownItem
+          {/* <DropdownItem
             href="/dashboard"
             icon={
               <svg
@@ -94,7 +94,7 @@ export function UserMenu() {
             }
           >
             Dashboard
-          </DropdownItem>
+          </DropdownItem> */}
 
           <DropdownItem
             href="/orders"
