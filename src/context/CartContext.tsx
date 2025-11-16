@@ -226,7 +226,7 @@ const updateQty = async (
   itemId: string,
   quantity: number
 ): Promise<CartResult> => {
-  // 1️⃣ Optimistic UI update
+  // Optimistic UI update
   setCart((prev) => {
     if (!prev) return prev;
     return {
