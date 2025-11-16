@@ -1,247 +1,191 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
-import { Heart, ShoppingCart, Minus, Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui";
 import type { Product } from "@/lib/types";
 import { useFavorite } from "@/context/FavoriteContext";
 import { useCart } from "@/context/CartContext";
+import YouMayAlsoLike from "./YouMayAlsoLike";
+
+import {
+  ImageGallery,
+  RatingStars,
+  StockStatus,
+  TagsList,
+  CategoriesList,
+  QuantitySelector,
+} from "./partials";
+// Removed stray events import
 
 interface ProductDetailProps {
   product: Product;
   onAddToCart?: (product: Product, quantity: number) => void;
   onWishList?: (product: Product) => void;
+  relatedProducts?: Product[];
 }
 
 export function ProductDetail({
   product,
   onAddToCart,
   onWishList,
+  relatedProducts,
 }: ProductDetailProps) {
   const { addToCart } = useCart();
+  const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const { toggleFavorite } = useFavorite();
+  const { toggleFavorite, isFavoritedLocal } = useFavorite();
+  const [addedToCart, setAddedToCart] = useState(false);
+  const isFavorited = isFavoritedLocal(product.id);
 
-  const price =
-    typeof product.price === "string"
-      ? parseFloat(product.price)
-      : product.price;
-  const images =
-    product.images && product.images.length > 0
-      ? product.images.map((img) => img.url)
-      : product.image
-        ? [product.image]
-        : ["/placeholder-product.png"];
+  const price = useMemo(
+    () =>
+      typeof product.price === "string"
+        ? parseFloat(product.price)
+        : product.price,
+    [product.price]
+  );
 
-  const handleQuantityChange = (delta: number) => {
-    const newQuantity = quantity + delta;
-    if (newQuantity >= 1 && newQuantity <= product.stock) {
-      setQuantity(newQuantity);
-    }
-  };
+  const images = useMemo(
+    () =>
+      product.images?.length
+        ? product.images.map((img) => img.url)
+        : product.image
+          ? [product.image]
+          : ["/placeholder-product.png"],
+    [product.images, product.image]
+  );
 
   const handleAddToCart = async () => {
-    if (onAddToCart) return onAddToCart(product, quantity);
-    // fallback to cart context
-    await addToCart(product.id, quantity);
+    if (onAddToCart) {
+      onAddToCart(product, quantity);
+    } else {
+      await addToCart(product.id, quantity);
+    }
+    setAddedToCart(true);
   };
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-      {/* Image Gallery */}
-      <div className="space-y-4">
-        {/* Main Image */}
-        <div className="relative w-full overflow-hidden bg-gray-100 rounded-lg aspect-square">
-          <Image
-            src={images[selectedImage]}
-            alt={product.name}
-            fill
-            className="object-cover"
-            priority
+    <div className="space-y-16 animate-fade-in">
+      {/* Main Product Layout */}
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
+        {/* Left: Gallery */}
+        <div className="p-4 transition-all duration-300 border shadow-lg rounded-2xl bg-white/60 dark:bg-neutral-900/60 backdrop-blur-sm border-neutral-200/60 dark:border-neutral-800/60">
+          <ImageGallery
+            images={images}
+            productName={product.name}
+            selectedIndex={selectedImage}
+            onSelect={setSelectedImage}
           />
         </div>
 
-        {/* Thumbnail Gallery */}
-        {images.length > 1 && (
-          <div className="grid grid-cols-4 gap-2">
-            {images.map((img, idx) => (
-              <button
-                key={idx}
-                onClick={() => setSelectedImage(idx)}
-                className={`relative aspect-square rounded-md overflow-hidden border-2 transition-all ${
-                  selectedImage === idx
-                    ? "border-blue-600 ring-2 ring-blue-200"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-                aria-label={`Select image ${idx + 1}`}
-              >
-                <Image
-                  src={img}
-                  alt={`${product.name} ${idx + 1}`}
-                  fill
-                  className="object-cover"
-                />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+        {/* Right: Product Info */}
+        <div className="px-2 space-y-8">
+          {/* Title + Rating */}
+          <header className="space-y-3">
+            <h1 className="text-4xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+              {product.name}
+            </h1>
 
-      {/* Product Info */}
-      <div className="space-y-6">
-        {/* Title and Rating */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-          {product.rating > 0 && (
-            <div className="flex items-center gap-2 mt-2">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <svg
-                    key={i}
-                    className={`w-5 h-5 ${
-                      i < Math.floor(product.rating)
-                        ? "text-yellow-400 fill-current"
-                        : "text-gray-300"
-                    }`}
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
+            {product.rating > 0 && (
+              <div className="flex items-center gap-3">
+                <RatingStars rating={product.rating} />
+                <span className="text-sm text-gray-600 dark:text-gray-300">
+                  {product.rating.toFixed(1)} / 5.0
+                </span>
               </div>
-              <span className="text-sm text-gray-600">
-                {product.rating.toFixed(1)} / 5.0
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Price */}
-        <div className="py-4 border-t border-b">
-          <div className="text-3xl font-bold text-gray-900">
-            ${price.toFixed(2)}
-          </div>
-          <div className="flex items-center gap-2 mt-2">
-            {product.stock > 0 ? (
-              <>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  In Stock
-                </span>
-                <span className="text-sm text-gray-600">
-                  {product.stock} {product.stock === 1 ? "unit" : "units"}{" "}
-                  available
-                </span>
-              </>
-            ) : (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                Out of Stock
-              </span>
             )}
-          </div>
-        </div>
+          </header>
 
-        {/* Description */}
-        <div>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">
-            Description
-          </h2>
-          <p className="leading-relaxed text-gray-700">{product.description}</p>
-        </div>
-
-        {/* Tags */}
-        {product.tags && product.tags.length > 0 && (
-          <div>
-            <h3 className="mb-2 text-sm font-semibold text-gray-900">Tags</h3>
-            <div className="flex flex-wrap gap-2">
-              {product.tags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="inline-flex items-center px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-full"
-                >
-                  {tag}
-                </span>
-              ))}
+          {/* Pricing + Stock */}
+          <section className="py-6 space-y-3 border-y border-neutral-200 dark:border-neutral-700">
+            <div className="text-4xl font-bold text-gray-900 dark:text-gray-100">
+              ${price.toFixed(2)}
             </div>
-          </div>
-        )}
+            <StockStatus stock={product.stock} />
+          </section>
 
-        {/* Categories */}
-        {product.categories && product.categories.length > 0 && (
-          <div>
-            <h3 className="mb-2 text-sm font-semibold text-gray-900">
-              Categories
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {product.categories.map((category) => (
-                <span
-                  key={category.id}
-                  className="inline-flex items-center px-3 py-1 text-sm text-blue-700 bg-blue-100 rounded-full"
-                >
-                  {category.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+          {/* Description */}
+          <section className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+            <h2 className="mb-3 text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Description
+            </h2>
+            <p className="opacity-90">{product.description}</p>
+          </section>
 
-        {/* Quantity Selector */}
-        {product.stock > 0 && (
-          <div>
-            <h3 className="mb-2 text-sm font-semibold text-gray-900">
-              Quantity
-            </h3>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => handleQuantityChange(-1)}
-                disabled={quantity <= 1}
-                className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Decrease quantity"
+          {/* Tags + Categories */}
+          <CategoriesList categories={product.categories} />
+
+          {/* Quantity Selector */}
+          {product.stock > 0 && (
+            <QuantitySelector
+              quantity={quantity}
+              stock={product.stock}
+              onChange={setQuantity}
+            />
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-wrap gap-4 pt-4">
+            <Button
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+              className="flex-1 h-12 text-lg transition-all shadow-md hover:shadow-lg rounded-xl"
+            >
+              <ShoppingCart className="w-6 h-6 mr-2" />
+              {addedToCart ? "Added" : "Add to Cart"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                toggleFavorite(product.id);
+                onWishList?.(product);
+              }}
+              aria-label={
+                isFavorited ? "Remove from favorites" : "Add to favorites"
+              }
+              aria-pressed={isFavorited}
+              className="h-12 px-5 text-lg rounded-xl border-neutral-300 hover:border-neutral-400 dark:border-neutral-700"
+            >
+              <Heart
+                className={
+                  "w-6 h-6 transition-colors " +
+                  (isFavorited
+                    ? "text-red-600"
+                    : "text-gray-600 dark:text-gray-300")
+                }
+                style={{ fill: isFavorited ? "currentColor" : "none" }}
+              />
+            </Button>
+            {addedToCart && (
+              <Button
+                variant="secondary"
+                onClick={() => router.push("/cart")}
+                className="h-12 px-5 text-lg shadow-sm rounded-xl"
               >
-                <Minus className="w-4 h-4" />
-              </button>
-              <span className="text-lg font-medium text-center min-w-12">
-                {quantity}
-              </span>
-              <button
-                onClick={() => handleQuantityChange(1)}
-                disabled={quantity >= product.stock}
-                className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Increase quantity"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
+                View Cart
+              </Button>
+            )}
+            <div role="status" aria-live="polite" className="sr-only">
+              {isFavorited ? "Favorited" : "Not favorited"};{" "}
+              {addedToCart ? "Added to cart" : "Not added to cart"}
             </div>
           </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-3 pt-4">
-          <Button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            className="flex-1"
-            label="Add to Cart"
-          >
-            <ShoppingCart className="w-5 h-5 mr-2" />
-            Add to Cart
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              toggleFavorite(product.id);
-              onWishList?.(product);
-            }}
-            label="Add to Wishlist"
-            aria-label="Add to wishlist"
-          >
-            <Heart className="w-5 h-5" />
-          </Button>
         </div>
       </div>
+
+      {/* YOU MAY ALSO LIKE */}
+      <section className="pt-12 mt-12 border-t border-neutral-300 dark:border-neutral-700">
+        <YouMayAlsoLike
+          products={relatedProducts ?? []}
+          onAddToCart={(p) => onAddToCart?.(p, 1)}
+          onWishList={onWishList}
+          categoryId={product.categories?.[0]?.id}
+          productId={product.id}
+        />
+      </section>
     </div>
   );
 }

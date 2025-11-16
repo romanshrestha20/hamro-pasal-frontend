@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ProductDetail } from "@/components/product";
 import { useProductContext } from "@/context/ProductContext";
@@ -8,12 +8,11 @@ import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import type { Product } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
-import { div } from "framer-motion/m";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { getProductById } = useProductContext();
+  const { getProductById, products } = useProductContext();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,11 +50,24 @@ export default function ProductDetailPage() {
     toast.success(`${product.name} added to wishlist!`);
   };
 
+  // Derive related products based on overlapping category IDs, excluding current product
+  const relatedProducts = useMemo(() => {
+    if (!product || !product.categories?.length) return [] as Product[];
+    const categoryIds = new Set(product.categories.map((c) => c.id));
+    return products
+      .filter(
+        (p) =>
+          p.id !== product.id &&
+          p.categories?.some((c) => categoryIds.has(c.id))
+      )
+      .slice(0, 12); // limit displayed related items
+  }, [product, products]);
+
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container px-4 py-8 mx-auto">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="inline-block w-12 h-12 border-b-2 border-blue-600 rounded-full animate-spin"></div>
           <p className="mt-4 text-gray-600">Loading product...</p>
         </div>
       </div>
@@ -64,14 +76,14 @@ export default function ProductDetailPage() {
 
   if (error || !product) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container px-4 py-8 mx-auto">
         <div className="text-center">
           <p className="text-lg font-semibold text-red-600">
             {error || "Product not found"}
           </p>
           <button
             onClick={() => router.push("/products")}
-            className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 mt-4 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Products
@@ -82,12 +94,12 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container px-4 py-8 mx-auto">
       {/* Back Button */}
       <Button
         label="Back"
         onClick={() => router.back()}
-        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+        className="inline-flex items-center gap-2 mb-6 text-gray-600 transition-colors hover:text-gray-900"
       >
         <ArrowLeft className="w-4 h-4" />
         Back
@@ -98,6 +110,7 @@ export default function ProductDetailPage() {
         product={product}
         onAddToCart={handleAddToCart}
         onWishList={handleWishList}
+        relatedProducts={relatedProducts}
       />
     </div>
   );
