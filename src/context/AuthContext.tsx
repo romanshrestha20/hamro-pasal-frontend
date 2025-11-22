@@ -94,6 +94,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  // Function to refresh the current user state from the backend
+  const refreshUser = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await getCurrentUser();
+      if (response.success && response.data) {
+        setUser(response.data);
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    } catch (err) {
+      console.error("Error fetching current user:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch user");
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // On component mount, refresh the user state
+  useEffect(() => {
+    let isMounted = true;
+
+    // IIFE to refresh user if component is still mounted
+    (async () => {
+      if (isMounted) {
+        try {
+          if (typeof window !== "undefined") {
+            const token = window.localStorage.getItem("hp_auth_token");
+            if (token) setAuthToken(token);
+          }
+        } catch {}
+        await refreshUser();
+      }
+    })();
+
+    // Cleanup function to set isMounted to false on unmount
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshUser]);
+
   // Login function to authenticate users
   const login = async (
     payload: LoginPayload,
@@ -312,51 +358,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
-  // Function to refresh the current user state from the backend
-  const refreshUser = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await getCurrentUser();
-      if (response.success && response.data) {
-        setUser(response.data);
-        setIsAuthenticated(true);
-      } else {
-        setUser(null);
-        setIsAuthenticated(false);
-      }
-    } catch (err) {
-      console.error("Error fetching current user:", err);
-      setError(err instanceof Error ? err.message : "Failed to fetch user");
-      setUser(null);
-      setIsAuthenticated(false);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // On component mount, refresh the user state
-  useEffect(() => {
-    let isMounted = true;
-
-    // IIFE to refresh user if component is still mounted
-    (async () => {
-      if (isMounted) {
-        try {
-          if (typeof window !== "undefined") {
-            const token = window.localStorage.getItem("hp_auth_token");
-            if (token) setAuthToken(token);
-          }
-        } catch {}
-        await refreshUser();
-      }
-    })();
-
-    // Cleanup function to set isMounted to false on unmount
-    return () => {
-      isMounted = false;
-    };
-  }, [refreshUser]);
 
   return (
     <AuthContext.Provider

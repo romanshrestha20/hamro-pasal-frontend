@@ -6,14 +6,9 @@ import DropDown, {
   DropdownItem,
   DropdownDivider,
 } from "@/components/ui/DropDown";
+import { User } from "@/lib/types/User";
 
-type MinimalUser = {
-  email?: string;
-  name?: string;
-  firstName?: string;
-  image?: string | null;
-  avatarUrl?: string | null;
-};
+
 
 export function UserMenu() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -31,8 +26,8 @@ export function UserMenu() {
     );
   }
 
-  const u = user as unknown as Partial<MinimalUser>;
-  const displayName = u?.firstName || u?.name || u?.email || "User";
+  const u = user as unknown as Partial<User>;
+  const displayName = u?.firstName || u?.lastName || u?.email || "User";
 
   // The main return statement uses a ternary operator wrapped in {}
   return (
