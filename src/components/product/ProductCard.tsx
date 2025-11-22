@@ -18,6 +18,7 @@ interface ProductCardProps {
   onAddToCart?: () => void;
   showActions?: boolean;
   onWishList?: (product: Product) => void;
+  className?: string;
 }
 
 export function ProductCard({
@@ -25,6 +26,7 @@ export function ProductCard({
   onAddToCart,
   showActions = true,
   onWishList,
+
 }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
   const { toggleFavorite, isFavoritedLocal } = useFavorite();
@@ -37,6 +39,7 @@ export function ProductCard({
     return addToCart(product.id, 1);
   };
 
+  // Determine image URL and price
   const imageUrl =
     product.image || product.images?.[0]?.url || "/placeholder-product.png";
   const price =
@@ -67,20 +70,20 @@ export function ProductCard({
 
         {/* Favorite button overlay */}
         {/* {isAuthenticated && ( */}
-          <button
-            type="button"
-            onClick={handleToggleFavorite}
-            aria-label={
-              isFavorited ? "Remove from favorites" : "Add to favorites"
-            }
-            className="absolute top-3 right-3"
-          >
-            <Heart
-              className={`h-6 w-6 transition ${
-                isFavorited ? "fill-red-500 text-red-500" : "text-gray-400"
-              }`}
-            />
-          </button>
+        <button
+          type="button"
+          onClick={handleToggleFavorite}
+          aria-label={
+            isFavorited ? "Remove from favorites" : "Add to favorites"
+          }
+          className="absolute top-3 right-3"
+        >
+          <Heart
+            className={`h-6 w-6 transition ${
+              isFavorited ? "fill-red-500 text-red-500" : "text-gray-400"
+            }`}
+          />
+        </button>
         {/* )} */}
 
         {/* Details */}
