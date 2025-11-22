@@ -17,6 +17,8 @@ import {
   CategoriesList,
   QuantitySelector,
 } from "./partials";
+import ReviewList from "../review/ReviewList";
+import ReviewForm from "../review/ReviewForm";
 // Removed stray events import
 
 interface ProductDetailProps {
@@ -186,6 +188,16 @@ export function ProductDetail({
           productId={product.id}
         />
       </section>
+
+      <div>
+        {/* existing product UI */}
+        <section className="pt-12 mt-12 border-t border-neutral-300 dark:border-neutral-700">
+          <ReviewForm productId={product.id} />
+          <div className="mt-6">
+            <ReviewList productId={product.id} />
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

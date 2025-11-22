@@ -19,8 +19,14 @@ export interface CreateReplyInput { comment: string; }
 export type UpdateReplyInput = Partial<CreateReplyInput>;
 
 // Like response shapes (backend may also supply a liked flag)
-export interface LikeReviewResponse { likesCount: number; liked?: boolean }
-export interface LikeReplyResponse { likesCount: number; liked?: boolean }
+export interface LikeReviewResponse {
+    likeCount: number;
+    liked: boolean;
+}
+export interface LikeReplyResponse {
+    likeCount: number;
+    liked: boolean;
+}
 
 // Reviews
 export const getProductReviews = (
@@ -34,7 +40,12 @@ export const createProductReview = (
     reviewData: CreateReviewInput,
     options?: RequestOptions
 ): Promise<ApiResponse<Review>> =>
-    apiRequest<Review>("post", `/reviews/`, reviewData, withConfig(options));
+    apiRequest<Review>(
+        "post",
+        `/reviews/`,
+        { ...reviewData, productId },
+        withConfig(options)
+    );
 
 export const getReviewById = (
     reviewId: string,
@@ -105,3 +116,4 @@ export const unlikeReply = (
     options?: RequestOptions
 ): Promise<ApiResponse<LikeReplyResponse>> =>
     apiRequest<LikeReplyResponse>("post", `/reviews/replies/${replyId}/unlike`, undefined, withConfig(options));
+

@@ -1,3 +1,5 @@
+import { User } from "./User";
+
 export interface Review {
     id: string;
     userId: string;
@@ -8,6 +10,9 @@ export interface Review {
     images?: string[];
     createdAt: string;
     updatedAt: string;
+    user: User;
+    likesCount: number;
+    likedByUser?: boolean;
 }
 
 export interface Reply {
@@ -17,6 +22,9 @@ export interface Reply {
     comment: string;
     createdAt: string;
     updatedAt: string;
+    user: User;
+    likesCount: number;
+    likedByUser?: boolean;
 }
 
 
