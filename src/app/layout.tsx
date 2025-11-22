@@ -11,6 +11,7 @@ import { CartProvider } from "@/context/CartContext";
 import { Toaster } from "react-hot-toast";
 import NavbarWrapper from "@/components/layout/NavbarWrapper"; // <- client wrapper
 import { Footer as SiteFooter } from "@/components/layout/Footer";
+import { ReviewProvider } from "@/context/ReviewContext";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -44,7 +45,9 @@ export default function RootLayout({
                 <ProductProvider>
                   <Toaster position="top-center" />
                   <NavbarWrapper /> {/* safe client component */}
-                  <main>{children}</main>
+                  <ReviewProvider>
+                    <main className="min-h-screen">{children}</main>
+                  </ReviewProvider>
                   {/* Global footer */}
                   <SiteFooter />
                 </ProductProvider>
