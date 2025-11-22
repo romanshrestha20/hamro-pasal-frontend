@@ -16,26 +16,17 @@ export default function ReviewList({
   onLike,
   onReply,
 }: ReviewListProps) {
-  const {
-    reviews,
-    loading,
-    error,
-    likeReview,
-    unlikeReview,
-    fetchProductReviews,
-  } = useReviewContext();
-
-  const handleLikeReview = async (reviewId: string, likedByUser?: boolean) => {
-    if (onLike) return onLike(reviewId);
-    if (likedByUser) await unlikeReview(reviewId);
-    else await likeReview(reviewId);
-  };
+  const { reviews, loading, error, fetchProductReviews, handleLikeReview } =
+    useReviewContext();
 
   useEffect(() => {
-    if (productId) {
-      void fetchProductReviews(productId);
-    }
+    if (productId) void fetchProductReviews(productId);
   }, [productId, fetchProductReviews]);
+
+  const onLikeClick = async (reviewId: string) => {
+    if (onLike) return onLike(reviewId);
+    await handleLikeReview(reviewId); // internal toggle
+  };
 
   if (loading)
     return <div className="py-6 text-gray-600">Loading reviews…</div>;
@@ -46,13 +37,11 @@ export default function ReviewList({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Reviews</h2>
         <p className="text-sm text-gray-500">What other customers are saying</p>
       </div>
 
-      {/* Empty State */}
       {reviews.length === 0 ? (
         <p className="italic text-gray-500">No reviews yet. Be the first!</p>
       ) : (
@@ -68,14 +57,10 @@ export default function ReviewList({
                 key={review.id}
                 className="p-5 space-y-3 transition bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md"
               >
-                {/* User Header */}
                 <div className="flex items-center gap-3">
-                  {/* Avatar + Name inline */}
                   <AvatarWithName user={user} />
-
                   <div className="flex flex-col leading-tight">
                     <span className="font-semibold">{displayName}</span>
-
                     <span className="text-xs text-gray-500">
                       {review.createdAt
                         ? new Date(review.createdAt).toLocaleString()
@@ -83,30 +68,20 @@ export default function ReviewList({
                     </span>
                   </div>
                 </div>
-
-                {/* Title */}
-                <h3 className="text-lg font-semibold tracking-tight">
+                <h3 className="text-lg font-semibold tracking-tight text-gray-800">
                   {review.title}
                 </h3>
-
-                {/* Comment */}
                 <p className="leading-relaxed text-gray-700">
                   {review.comment}
                 </p>
-
-                {/* Rating */}
                 <p className="text-sm font-medium text-gray-600">
                   ⭐ Rating: {review.rating} / 5
                 </p>
-
-                {/* Actions */}
                 <ReviewActions
                   reviewId={review.id}
                   likes={review.likesCount}
                   likedByUser={!!review.likedByUser}
-                  onLike={() =>
-                    handleLikeReview(review.id, !!review.likedByUser)
-                  }
+                  onLike={() => onLikeClick(review.id)}
                   onReply={() => onReply?.(review.id)}
                 />
               </li>

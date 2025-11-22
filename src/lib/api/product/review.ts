@@ -66,17 +66,16 @@ export const deleteReview = (
 ): Promise<ApiResponse<{ message: string }>> =>
     apiRequest<{ message: string }>("delete", `/reviews/${reviewId}`, undefined, withConfig(options));
 
-export const likeReview = (
+export const toggleLikeReview = (
     reviewId: string,
     options?: RequestOptions
 ): Promise<ApiResponse<LikeReviewResponse>> =>
-    apiRequest<LikeReviewResponse>("post", `/reviews/${reviewId}/like`, undefined, withConfig(options));
-
-export const unlikeReview = (
-    reviewId: string,
-    options?: RequestOptions
-): Promise<ApiResponse<LikeReviewResponse>> =>
-    apiRequest<LikeReviewResponse>("post", `/reviews/${reviewId}/unlike`, undefined, withConfig(options));
+    apiRequest<LikeReviewResponse>(
+        "post",
+        `/reviews/${reviewId}/like-toggle`,
+        undefined,
+        withConfig(options)
+    );
 
 // Replies
 export const addReplyToReview = (
@@ -105,15 +104,13 @@ export const deleteReply = (
 ): Promise<ApiResponse<{ message: string }>> =>
     apiRequest<{ message: string }>("delete", `/reviews/replies/${replyId}`, undefined, withConfig(options));
 
-export const likeReply = (
+export const toggleLikeReply = (
     replyId: string,
     options?: RequestOptions
 ): Promise<ApiResponse<LikeReplyResponse>> =>
-    apiRequest<LikeReplyResponse>("post", `/reviews/replies/${replyId}/like`, undefined, withConfig(options));
-
-export const unlikeReply = (
-    replyId: string,
-    options?: RequestOptions
-): Promise<ApiResponse<LikeReplyResponse>> =>
-    apiRequest<LikeReplyResponse>("post", `/reviews/replies/${replyId}/unlike`, undefined, withConfig(options));
-
+    apiRequest<LikeReplyResponse>(
+        "post",
+        `/reviews/replies/${replyId}/like-toggle`,
+        undefined,
+        withConfig(options)
+    );  

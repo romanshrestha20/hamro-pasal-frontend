@@ -17,16 +17,14 @@ import {
   createProductReview as apiCreateProductReview,
   updateReview as apiUpdateReview,
   deleteReview as apiDeleteReview,
-  likeReview as apiLikeReview,
-  unlikeReview as apiUnlikeReview,
+  toggleLikeReview as apiToggleLikeReview,
   addReplyToReview as apiAddReplyToReview,
   getRepliesForReview as apiGetRepliesForReview,
   updateReply as apiUpdateReply,
   deleteReply as apiDeleteReply,
-  likeReply as apiLikeReply,
-  unlikeReply as apiUnlikeReply,
-  LikeReplyResponse,
+  toggleLikeReply as apiToggleLikeReply,
   LikeReviewResponse,
+  LikeReplyResponse,
 } from "@/lib/api/product";
 
 import toast from "react-hot-toast";
@@ -67,9 +65,7 @@ export interface ReviewContextType {
     reviewId: string
   ) => Promise<ReviewResult<{ message: string }>>;
 
-  likeReview: (reviewId: string) => Promise<ReviewResult<LikeReviewResponse>>;
-  unlikeReview: (reviewId: string) => Promise<ReviewResult<LikeReviewResponse>>;
-
+  handleLikeReview: (reviewId: string) => Promise<LikeReviewResponse>;
   addReplyToReview: (
     reviewId: string,
     replyData: { comment: string }
@@ -87,8 +83,7 @@ export interface ReviewContextType {
 
   deleteReply: (replyId: string) => Promise<ReviewResult<{ message: string }>>;
 
-  likeReply: (replyId: string) => Promise<ReviewResult<LikeReplyResponse>>;
-  unlikeReply: (replyId: string) => Promise<ReviewResult<LikeReplyResponse>>;
+  handleLikeReply: (replyId: string) => Promise<LikeReplyResponse>;
 }
 
 // Initial context
@@ -105,8 +100,6 @@ export const ReviewContext = createContext<ReviewContextType>({
   addProductReview: async () => ({ success: false, error: "Not implemented" }),
   updateReview: async () => ({ success: false, error: "Not implemented" }),
   deleteReview: async () => ({ success: false, error: "Not implemented" }),
-  likeReview: async () => ({ success: false, error: "Not implemented" }),
-  unlikeReview: async () => ({ success: false, error: "Not implemented" }),
   addReplyToReview: async () => ({ success: false, error: "Not implemented" }),
   getRepliesForReview: async () => ({
     success: false,
@@ -114,8 +107,9 @@ export const ReviewContext = createContext<ReviewContextType>({
   }),
   updateReply: async () => ({ success: false, error: "Not implemented" }),
   deleteReply: async () => ({ success: false, error: "Not implemented" }),
-  likeReply: async () => ({ success: false, error: "Not implemented" }),
-  unlikeReply: async () => ({ success: false, error: "Not implemented" }),
+
+  handleLikeReview: async () => ({ liked: false, likeCount: 0 }),
+  handleLikeReply: async () => ({ liked: false, likeCount: 0 }),
 });
 
 export const ReviewProvider = ({ children }: { children: React.ReactNode }) => {
@@ -263,66 +257,6 @@ export const ReviewProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   /* ------------------------------------------------------
-   * LIKE REVIEW
-   * ------------------------------------------------------ */
-  const likeReview = React.useCallback(
-    async (reviewId: string): Promise<ReviewResult<LikeReviewResponse>> => {
-      try {
-        const res = await apiLikeReview(reviewId);
-        if (!res.success || !res.data)
-          return {
-            success: false,
-            error: res.error || "Failed to like review",
-          };
-
-        const { likeCount } = res.data;
-        setReviews((prev) =>
-          prev.map((r) =>
-            r.id === reviewId
-              ? { ...r, likesCount: likeCount, likedByUser: true }
-              : r
-          )
-        );
-
-        return { success: true, data: res.data };
-      } catch (err) {
-        return handleError(err, "Failed to like review");
-      }
-    },
-    [handleError]
-  );
-
-  /* ------------------------------------------------------
-   * UNLIKE REVIEW
-   * ------------------------------------------------------ */
-  const unlikeReview = React.useCallback(
-    async (reviewId: string): Promise<ReviewResult<LikeReviewResponse>> => {
-      try {
-        const res = await apiUnlikeReview(reviewId);
-        if (!res.success || !res.data)
-          return {
-            success: false,
-            error: res.error || "Failed to unlike review",
-          };
-
-        const { likeCount } = res.data;
-        setReviews((prev) =>
-          prev.map((r) =>
-            r.id === reviewId
-              ? { ...r, likesCount: likeCount, likedByUser: false }
-              : r
-          )
-        );
-
-        return { success: true, data: res.data };
-      } catch (err) {
-        return handleError(err, "Failed to unlike review");
-      }
-    },
-    [handleError]
-  );
-
-  /* ------------------------------------------------------
    * ADD REPLY
    * ------------------------------------------------------ */
   const addReplyToReview = React.useCallback(
@@ -429,65 +363,80 @@ export const ReviewProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   /* ------------------------------------------------------
-   * LIKE REPLY
+   * LIKE REVIEW (toggle)
    * ------------------------------------------------------ */
-  const likeReply = React.useCallback(
-    async (replyId: string): Promise<ReviewResult<LikeReplyResponse>> => {
+  const handleLikeReview = useCallback(
+    async (reviewId: string): Promise<LikeReviewResponse> => {
       try {
-        const res = await apiLikeReply(replyId);
-        if (!res.success || !res.data)
-          return { success: false, error: res.error || "Failed to like reply" };
-
-        const { likeCount, liked } = res.data;
-
-        setReplies((prev) =>
-          prev.map((rp) =>
-            rp.id === replyId
-              ? { ...rp, likesCount: likeCount, likedByUser: liked }
-              : rp
-          )
-        );
-
-        return { success: true, data: res.data };
-      } catch (err) {
-        return handleError(err, "Failed to like reply");
+        const res = await apiToggleLikeReview(reviewId);
+        type LikeReviewApi = {
+          success: boolean;
+          data?: LikeReviewResponse;
+          error?: string;
+        };
+        const parsed = res as unknown as LikeReviewApi;
+        if (parsed.success && parsed.data) {
+          const data = parsed.data;
+          setReviews((prev) =>
+            prev.map((r) =>
+              r.id === reviewId
+                ? {
+                    ...r,
+                    likedByUser: data.liked,
+                    likesCount: data.likeCount,
+                  }
+                : r
+            )
+          );
+          return data;
+        }
+        throw new Error(parsed.error || "Failed to toggle like");
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to toggle like";
+        toast.error(msg);
+        return { liked: false, likeCount: 0 };
       }
     },
-    [handleError]
+    []
   );
-
   /* ------------------------------------------------------
-   * UNLIKE REPLY
+   * LIKE REPLY (toggle)
    * ------------------------------------------------------ */
-  const unlikeReply = React.useCallback(
-    async (replyId: string): Promise<ReviewResult<LikeReplyResponse>> => {
+  const handleLikeReply = useCallback(
+    async (replyId: string): Promise<LikeReplyResponse> => {
       try {
-        const res = await apiUnlikeReply(replyId);
-
-        if (!res.success || !res.data)
-          return {
-            success: false,
-            error: res.error || "Failed to unlike reply",
-          };
-
-        const { likeCount, liked } = res.data;
-
-        setReplies((prev) =>
-          prev.map((rp) =>
-            rp.id === replyId
-              ? { ...rp, likesCount: likeCount, likedByUser: liked }
-              : rp
-          )
-        );
-
-        return { success: true, data: res.data };
-      } catch (err) {
-        return handleError(err, "Failed to unlike reply");
+        const res = await apiToggleLikeReply(replyId);
+        type LikeReplyApi = {
+          success: boolean;
+          data?: LikeReplyResponse;
+          error?: string;
+        };
+        const parsed = res as unknown as LikeReplyApi;
+        if (parsed.success && parsed.data) {
+          const data = parsed.data;
+          setReplies((prev) =>
+            prev.map((rp) =>
+              rp.id === replyId
+                ? {
+                    ...rp,
+                    likedByUser: data.liked,
+                    likesCount: data.likeCount,
+                  }
+                : rp
+            )
+          );
+          return data;
+        }
+        throw new Error(parsed.error || "Failed to toggle reply like");
+      } catch (e) {
+        const msg =
+          e instanceof Error ? e.message : "Failed to toggle reply like";
+        toast.error(msg);
+        return { liked: false, likeCount: 0 };
       }
     },
-    [handleError]
+    []
   );
-
   /* ------------------------------------------------------
    * PROVIDER
    * ------------------------------------------------------ */
@@ -502,14 +451,12 @@ export const ReviewProvider = ({ children }: { children: React.ReactNode }) => {
       addProductReview,
       updateReview,
       deleteReview,
-      likeReview,
-      unlikeReview,
       addReplyToReview,
       getRepliesForReview,
       updateReply,
       deleteReply,
-      likeReply,
-      unlikeReply,
+      handleLikeReview,
+      handleLikeReply,
     }),
     [
       reviews,
@@ -521,14 +468,13 @@ export const ReviewProvider = ({ children }: { children: React.ReactNode }) => {
       addProductReview,
       updateReview,
       deleteReview,
-      likeReview,
-      unlikeReview,
+
       addReplyToReview,
       getRepliesForReview,
       updateReply,
       deleteReply,
-      likeReply,
-      unlikeReply,
+      handleLikeReview,
+      handleLikeReply,
     ]
   );
 

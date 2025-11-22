@@ -16,19 +16,13 @@ export default function ReviewList({
   onLike,
   onReply,
 }: ReviewListProps) {
-  const {
-    reviews,
-    loading,
-    error,
-    likeReview,
-    unlikeReview,
-    fetchProductReviews,
-  } = useReviewContext();
+  const { reviews, loading, error, handleLikeReply, fetchProductReviews } =
+    useReviewContext();
 
-  const handleLikeReview = async (reviewId: string, likedByUser?: boolean) => {
+  const onLikeClick = async (reviewId: string, likedByUser?: boolean) => {
     if (onLike) return onLike(reviewId);
-    if (likedByUser) await unlikeReview(reviewId);
-    else await likeReview(reviewId);
+    if (likedByUser) await handleLikeReply(reviewId);
+    else await handleLikeReply(reviewId);
   };
 
   useEffect(() => {
@@ -93,7 +87,7 @@ export default function ReviewList({
                 reviewId={review.id}
                 likes={review.likesCount}
                 likedByUser={!!review.likedByUser}
-                onLike={() => handleLikeReview(review.id, !!review.likedByUser)}
+                onLike={() => onLikeClick(review.id, !!review.likedByUser)}
                 onReply={() => onReply?.(review.id)}
               />
             </li>
