@@ -76,14 +76,11 @@ export default function CartSummary() {
       transition-all duration-200 shadow-sm`}
             disabled={loading || totalItems === 0}
             onClick={() => {
-              if (!isAuthenticated) {
-                toast.error("Please log in to proceed to checkout.");
-                return;
-              }
-              if (totalItems === 0) {
-                toast.error("Your cart is empty.");
-                return;
-              }
+              toast.error(
+                isAuthenticated
+                  ? "Checkout functionality not implemented yet."
+                  : "Please log in to proceed to checkout."
+              );
             }}
           >
             {loading ? (

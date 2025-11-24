@@ -12,6 +12,7 @@ export const Input = ({ label, error, ...props }: InputProps) => {
         <label className="text-sm font-medium text-gray-700">{label}</label>
       )}
       <input
+        value={props.value}
         {...props}
         className={` text-gray-700 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500
         ${error ? "border-red-500" : "border-gray-300"}
