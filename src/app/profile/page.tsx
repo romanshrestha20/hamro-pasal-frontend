@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/Button";
 import UserForm from "@/components/forms/UserForm";
 
 export default function ProfilePage() {
-  const { user, loading, isAuthenticated, logout, refreshUser } = useAuth();
-  const router = useRouter();
+  const { user, loading, isAuthenticated, refreshUser } = useAuth();
 
   const handleProfileImageUpdated = async (newUrl: string) => {
     console.log("Profile image updated:", newUrl);
@@ -98,23 +97,19 @@ export default function ProfilePage() {
             <div className="space-y-3 text-sm">
               <div>
                 <span className="text-gray-500">Account Type:</span>
-                <span className="ml-2 font-medium">
+                <span className="ml-2 font-medium text-gray-700">
                   {user.isAdmin ? "Admin" : "Customer"}
                 </span>
               </div>
               <div>
                 <span className="text-gray-500">Member Since:</span>
-                <span className="ml-2 font-medium">
-                  {new Date(user.createdAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                <span className="ml-2 font-medium text-gray-700">
+                  {new Date(user.createdAt).toLocaleDateString()}
                 </span>
               </div>
               <div>
                 <span className="text-gray-500">Last Updated:</span>
-                <span className="ml-2 font-medium">
+                <span className="ml-2 font-medium text-gray-700">
                   {new Date(user.updatedAt).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",

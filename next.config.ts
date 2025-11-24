@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
       { protocol: "http", hostname: "127.0.0.1" },
       // Unsplash for product placeholder images
       { protocol: "https", hostname: "images.unsplash.com" },
+      // DummyJSON CDN hosts for seeded product images
+      { protocol: "https", hostname: "cdn.dummyjson.com" },
+      { protocol: "https", hostname: "i.dummyjson.com" },
     ],
   },
   async headers() {
