@@ -3,61 +3,43 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import { useProductContext } from "@/context/ProductContext";
 import toast from "react-hot-toast";
-import ProductFilters, {
-  FilterState,
-} from "@/components/filters/ProductFilters";
+
+import ProductFilters, { FilterState } from "@/components/filters/ProductFilters";
 import CategoriesSidebar from "@/components/layout/CategoriesSidebar";
 import ViewModeToggle from "@/components/filters/ViewModeToggle";
 import ActiveFiltersBar from "@/components/filters/ActiveFilterBar";
 import EmptyState from "@/components/filters/EmptyState";
+import HomeCarousel from "@/components/layout/HomeCarousel";
 
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ProductList } from "@/components/product/ProductList";
-
-import HomeCarousel from "@/components/layout/HomeCarousel";
 
 import LoadingState from "@/components/common/LoadingState";
 import ErrorState from "@/components/common/ErrorState";
 import Pagination from "@/components/common/Pagination";
 import { usePagination } from "@/hooks/usePagination";
+
 /* ================================================================
    PAGE: Products
 ================================================================= */
 export default function ProductsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams(); // ⭐ Reacts to URL instantly
 
-  const { products, categories, loading, error } = useProductContext();
-  const { fetchProductsByCategory, fetchAllProducts } = useProductContext();
+  const { products, categories, loading, error, fetchProductsByCategory, fetchAllProducts } =
+    useProductContext();
 
   /* ================================================================
-     Search Query from URL
+     Search Query Sync from URL
   ================================================================= */
-  const [searchQuery, setSearchQuery] = useState(() => {
-    try {
-      return new URLSearchParams(window.location.search).get("q") || "";
-    } catch {
-      return "";
-    }
-  });
-
-  useEffect(() => {
-    const handler = () => {
-      try {
-        const q = new URLSearchParams(window.location.search).get("q") || "";
-        setSearchQuery(q);
-      } catch {
-        setSearchQuery("");
-      }
-    };
-    window.addEventListener("popstate", handler);
-    return () => window.removeEventListener("popstate", handler);
-  }, []);
+  const searchQuery = searchParams.get("q") ?? "";
 
   /* ================================================================
-     Filter State
+     Filters
   ================================================================= */
   const [filters, setFilters] = useState<FilterState>({
     categoryId: null,
@@ -65,6 +47,18 @@ export default function ProductsPage() {
     sortBy: "newest",
   });
 
+  /* ================================================================
+     Sync searchQuery → filters.search
+  ================================================================= */
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, search: searchQuery }));
+  }, [searchQuery]);
+
+  console.log("Search Query:", searchQuery);
+
+  /* ================================================================
+     Category State
+  ================================================================= */
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   /* ================================================================
@@ -77,8 +71,6 @@ export default function ProductsPage() {
   ================================================================= */
   const clearSearch = () => {
     router.push("/products");
-    setSearchQuery("");
-    setFilters((prev) => ({ ...prev, search: "" }));
   };
 
   /* ================================================================
@@ -101,12 +93,14 @@ export default function ProductsPage() {
 
     const activeCategory = selectedCategory || filters.categoryId;
 
+    // Category filter
     if (activeCategory) {
       list = list.filter((p) =>
         p.categories?.some((cat) => cat.id === activeCategory)
       );
     }
 
+    // Search filter
     if (filters.search.trim()) {
       const q = filters.search.toLowerCase();
       list = list.filter((p) =>
@@ -116,11 +110,13 @@ export default function ProductsPage() {
       );
     }
 
+    // Sorting
     switch (filters.sortBy) {
       case "newest":
         list.sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            new Date(b.createdAt).getTime() -
+            new Date(a.createdAt).getTime()
         );
         break;
       case "priceLowHigh":
@@ -140,10 +136,14 @@ export default function ProductsPage() {
     return list;
   }, [products, filters, selectedCategory]);
 
+  /* ================================================================
+     Pagination
+  ================================================================= */
   const { page, setPage, paginated, totalPages } = usePagination(
     filteredProducts,
     12
   );
+
   /* ================================================================
      Loading States
   ================================================================= */
@@ -224,6 +224,8 @@ export default function ProductsPage() {
           )}
         </div>
       </div>
+
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-10">
           <Pagination
