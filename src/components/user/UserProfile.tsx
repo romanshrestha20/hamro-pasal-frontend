@@ -132,18 +132,8 @@ const UserProfile = ({
                 address={user.address}
                 loading={uploading}
                 onSubmit={handleSubmit}
+                onCancel={() => setIsEditing(false)}
               />
-
-              <div className="flex gap-3 mt-3">
-                {/* Cancel */}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setIsEditing(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
             </div>
           ) : (
             <>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import toast from "react-hot-toast";
+import LoadingState from "../common/LoadingState";
 
 interface UserFormProps {
   firstName?: string;
@@ -16,6 +17,7 @@ interface UserFormProps {
     email: string;
     address: string;
   }) => Promise<void>;
+  onCancel?: () => void;
   loading?: boolean;
 }
 
@@ -25,6 +27,7 @@ export default function UserForm({
   email = "",
   address = "",
   onSubmit,
+  onCancel = () => {},
   loading = false,
 }: UserFormProps) {
   const [formData, setFormData] = useState({
@@ -64,7 +67,7 @@ export default function UserForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-6 space-y-4 border shadow-sm  bg-card text-card-foreground border-border rounded-xl"
+      className="p-6 space-y-4 border shadow-sm bg-card text-card-foreground border-border rounded-xl"
     >
       <Input
         label="First Name"
@@ -103,6 +106,15 @@ export default function UserForm({
 
       <Button type="submit" disabled={isSubmitting || loading}>
         {isSubmitting || loading ? "Saving..." : "Save Changes"}
+      </Button>
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={() => {
+          onCancel();
+        }}
+      >
+        Cancel
       </Button>
     </form>
   );

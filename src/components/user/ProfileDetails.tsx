@@ -25,7 +25,18 @@ const ProfileDetails = ({ user, className = "" }: ProfileDetailsProps) => {
       {fullName && <DetailRow label="Name" value={fullName} />}
       {user?.email && <DetailRow label="Email" value={user.email} />}
       {user?.phone && <DetailRow label="Phone" value={user.phone} />}
-      {user?.address && <DetailRow label="Address" value={user.address} />}
+
+      {user.address ? (
+        <DetailRow label="Address" value={user.address} />
+      ) : (
+        <div className="space-y-1">
+          <DetailRow label="Address" value="Not provided" />
+          <p className="text-xs font-medium text-destructive">
+            Please add your address as soon as possible to avoid issues with
+            order delivery.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
