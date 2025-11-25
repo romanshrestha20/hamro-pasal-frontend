@@ -89,3 +89,23 @@ body,
 * {
   transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
+
+
+
+
+.dropdown-animate {
+  animation: dropdown-scale-fade 0.18s ease-out;
+  transform-origin: top right;
+}
+
+@keyframes dropdown-scale-fade {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
