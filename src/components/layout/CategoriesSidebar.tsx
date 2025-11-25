@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, KeyboardEvent, useState } from "react";
+import { useMemo, KeyboardEvent } from "react";
 import { useProductContext } from "@/context/ProductContext";
-import { Button } from "../ui";
 
 interface CategoriesSidebarProps {
   selectedCategory?: string | null;
@@ -17,7 +16,6 @@ export default function CategoriesSidebar({
   className = "",
   emptyMessage = "No categories found",
 }: CategoriesSidebarProps) {
-  const [open, setOpen] = useState(false);
   const { categories, products, loading, error } = useProductContext();
 
   // Compute product counts
@@ -47,36 +45,34 @@ export default function CategoriesSidebar({
   };
 
   const baseItemClasses =
-    "w-full text-left px-3 py-2 rounded-md transition-colors select-none flex items-center justify-between cursor-pointer";
+    "w-full text-left px-3 py-2 rounded-md select-none flex items-center justify-between cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent";
 
   const selectedClasses =
-    "bg-bright-blue-100 dark:bg-bright-blue-900/40 text-bright-blue-700 dark:text-bright-blue-400 font-medium border border-bright-blue-300 dark:border-bright-blue-700";
+    "bg-muted text-foreground font-medium border border-accent";
 
-  const unselectedClasses =
-    "text-gray-700 dark:text-gray-300 hover:bg-soft-lavender-300 dark:hover:bg-gray-700";
+  const unselectedClasses = "text-muted-foreground hover:bg-muted";
 
   return (
-    
     <aside className={`lg:w-64 shrink-0 ${className}`}>
       <div
-        className="sticky p-4 bg-white border rounded-lg shadow-sm top-20 dark:bg-gray-800 border-soft-lavender-500 dark:border-gray-700"
+        className="sticky p-4 border rounded-lg shadow-sm top-20 bg-card text-card-foreground"
         role="navigation"
         aria-label="Filter by category"
       >
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">
           Categories
         </h2>
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="w-8 h-8 border-b-2 rounded-full animate-spin border-bright-blue-500" />
+            <div className="w-8 h-8 border-b-2 rounded-full animate-spin border-accent" />
           </div>
         ) : error ? (
-          <div className="p-3 text-sm rounded-md text-vivid-red-600 dark:text-vivid-red-400 bg-vivid-red-50 dark:bg-vivid-red-900/20">
+          <div className="p-3 text-sm rounded-md text-error bg-error/10">
             {error}
           </div>
         ) : categories.length === 0 ? (
-          <p className="py-4 text-sm text-center text-gray-500 dark:text-gray-400">
+          <p className="py-4 text-sm text-center text-muted-foreground">
             {emptyMessage}
           </p>
         ) : (
@@ -97,7 +93,7 @@ export default function CategoriesSidebar({
               }`}
             >
               <span>All Products</span>
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="text-sm text-muted-foreground">
                 {totalCount}
               </span>
             </div>
@@ -120,9 +116,7 @@ export default function CategoriesSidebar({
                   }`}
                 >
                   <span>{category.name}</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {count}
-                  </span>
+                  <span className="text-sm text-muted-foreground">{count}</span>
                 </div>
               );
             })}
