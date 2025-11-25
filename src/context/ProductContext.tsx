@@ -1,8 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import toast from "react-hot-toast";
 import type { Product, Category } from "@/lib/types";
+
 import {
   getAllProducts as apiGetAllProducts,
   getProductById as apiGetProductById,
@@ -13,39 +21,30 @@ import {
   fetchCategories as apiFetchCategories,
 } from "@/lib/api/product/index";
 
-// Define a typed result for product actions 
+// Typed API result
 export type ProductResult =
   | { success: true; data: Product | Product[] | Category[] }
   | { success: false; error: string };
 
-  // Define the context type with state and actions for products and categories
-export interface ProductContextType {
+interface ProductContextType {
   products: Product[];
   categories: Category[];
   loading: boolean;
   error: string | null;
+
   fetchAllProducts: (signal?: AbortSignal) => Promise<void>;
-  getProductById: (
-    productId: string,
-    signal?: AbortSignal
-  ) => Promise<ProductResult>;
-  updateProduct: (
-    productId: string,
-    updatedData: Partial<Product>
-  ) => Promise<ProductResult>;
-  deleteProduct: (productId: string) => Promise<ProductResult>;
-  searchProducts: (
-    query: string,
-    signal?: AbortSignal
-  ) => Promise<ProductResult>;
+  getProductById: (id: string, signal?: AbortSignal) => Promise<ProductResult>;
+  updateProduct: (id: string, data: Partial<Product>) => Promise<ProductResult>;
+  deleteProduct: (id: string) => Promise<ProductResult>;
+  searchProducts: (q: string, signal?: AbortSignal) => Promise<ProductResult>;
   fetchProductsByCategory: (
-    categoryId: string,
+    id: string,
     signal?: AbortSignal
   ) => Promise<ProductResult>;
   fetchCategories: (signal?: AbortSignal) => Promise<ProductResult>;
 }
 
-// Create the ProductContext with default values to ensure type safety
+// Default context (never used, only for TS)
 export const ProductContext = createContext<ProductContextType>({
   products: [],
   categories: [],
@@ -70,172 +69,151 @@ export const ProductProvider = ({
 }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // AbortControllers to avoid memory leaks
   const productsAbortRef = useRef<AbortController | null>(null);
   const categoriesAbortRef = useRef<AbortController | null>(null);
 
-  const fetchAllProducts = async (signal?: AbortSignal) => {
-    setLoading(true);
-    try {
-      const response = await apiGetAllProducts({ signal });
-      if (response.success && Array.isArray(response.data)) {
-        setProducts(response.data);
-        setError(null);
-      } else {
-        setError(response.error || "Failed to fetch products");
+  /*************************************************
+   * 🔥 Universal request handler
+   *************************************************/
+  const handleApi = useCallback(
+    async <T,>(
+      apiFn: (...args: any[]) => Promise<any>,
+      args: any[],
+      onSuccess?: (data: T) => void
+    ): Promise<ProductResult> => {
+      try {
+        const res = await apiFn(...args);
+
+        if (res.success) {
+          if (onSuccess) onSuccess(res.data);
+          return { success: true, data: res.data };
+        }
+
+        return { success: false, error: res.error || "Request failed" };
+      } catch (err: any) {
+        return { success: false, error: err.message || "Request error" };
       }
-    } catch (err) {
-      setError("An error occurred while fetching products");
-    } finally {
+    },
+    []
+  );
+
+  /*************************************************
+   * FETCH ALL PRODUCTS
+   *************************************************/
+  const fetchAllProducts = useCallback(
+    async (signal?: AbortSignal) => {
+      setLoading(true);
+      const result = await handleApi<Product[]>(
+        apiGetAllProducts,
+        [{ signal }],
+        (data) => setProducts(data)
+      );
+
+      setError(result.success ? null : result.error);
       setLoading(false);
-    }
-  };
+    },
+    [handleApi]
+  );
 
-  const fetchCategories = async (
-    signal?: AbortSignal
-  ): Promise<ProductResult> => {
-    try {
-      const response = await apiFetchCategories({ signal });
-      if (response.success && Array.isArray(response.data)) {
-        setCategories(response.data);
-        return { success: true, data: response.data };
-      }
-      return {
-        success: false,
-        error: response.error || "Failed to fetch categories",
-      };
-    } catch (err: any) {
-      return {
-        success: false,
-        error: err.message || "Failed to fetch categories",
-      };
-    }
-  };
+  /*************************************************
+   * FETCH CATEGORIES
+   *************************************************/
+  const fetchCategories = useCallback(
+    async (signal?: AbortSignal) =>
+      handleApi<Category[]>(apiFetchCategories, [{ signal }], (data) =>
+        setCategories(data)
+      ),
+    [handleApi]
+  );
 
-  const getProductById = async (
-    productId: string,
-    signal?: AbortSignal
-  ): Promise<ProductResult> => {
-    try {
-      const response = await apiGetProductById(productId, { signal });
-      if (response.success && response.data)
-        return { success: true, data: response.data };
-      return {
-        success: false,
-        error: response.error || "Failed to fetch product",
-      };
-    } catch (err: any) {
-      return {
-        success: false,
-        error: err.message || "Failed to fetch product",
-      };
-    }
-  };
+  /*************************************************
+   * GET PRODUCT BY ID
+   *************************************************/
+  const getProductById = useCallback(
+    async (productId: string, signal?: AbortSignal) =>
+      handleApi<Product>(apiGetProductById, [productId, { signal }]),
+    [handleApi]
+  );
 
-  const fetchProductsByCategory = async (
-    categoryId: string,
-    signal?: AbortSignal
-  ): Promise<ProductResult> => {
-    try {
-      const response = await apiFetchProductsByCategory(categoryId, { signal });
-      if (response.success && Array.isArray(response.data))
-        return { success: true, data: response.data };
-      return {
-        success: false,
-        error: response.error || "Failed to fetch products by category",
-      };
-    } catch (err: any) {
-      return {
-        success: false,
-        error: err.message || "Failed to fetch products by category",
-      };
-    }
-  };
+  /*************************************************
+   * SEARCH PRODUCTS
+   *************************************************/
+  const searchProducts = useCallback(
+    async (query: string, signal?: AbortSignal) =>
+      handleApi<Product[]>(apiSearchProducts, [query, { signal }]),
+    [handleApi]
+  );
 
-  const searchProducts = async (
-    query: string,
-    signal?: AbortSignal
-  ): Promise<ProductResult> => {
-    try {
-      const response = await apiSearchProducts(query, { signal });
-      if (response.success && Array.isArray(response.data))
-        return { success: true, data: response.data };
-      return {
-        success: false,
-        error: response.error || "Failed to search products",
-      };
-    } catch (err: any) {
-      return {
-        success: false,
-        error: err.message || "Failed to search products",
-      };
-    }
-  };
+  /*************************************************
+   * FETCH BY CATEGORY
+   *************************************************/
+  const fetchProductsByCategory = useCallback(
+    async (categoryId: string, signal?: AbortSignal) =>
+      handleApi<Product[]>(apiFetchProductsByCategory, [
+        categoryId,
+        { signal },
+      ]),
+    [handleApi]
+  );
 
-  const updateProduct = async (
-    productId: string,
-    updatedData: Partial<Product>
-  ): Promise<ProductResult> => {
-    try {
-      const response = await apiUpdateProduct(productId, updatedData);
-      if (response.success && response.data) {
-        const updated = response.data as Product; // single product expected
-        setProducts((prev) =>
-          prev.map((p) => (p.id === productId ? updated : p))
+  /*************************************************
+   * UPDATE PRODUCT
+   *************************************************/
+  const updateProduct = useCallback(
+    async (productId: string, data: Partial<Product>) =>
+      handleApi<Product>(apiUpdateProduct, [productId, data], (updated) => {
+        setProducts((p) =>
+          p.map((prod) => (prod.id === productId ? updated : prod))
         );
-        toast.success("Product updated successfully!");
-        return { success: true, data: updated };
-      }
-      return {
-        success: false,
-        error: response.error || "Failed to update product",
-      };
-    } catch {
-      return {
-        success: false,
-        error: "An error occurred while updating product",
-      };
-    }
-  };
+        toast.success("Product updated!");
+      }),
+    [handleApi]
+  );
 
-  const deleteProduct = async (productId: string): Promise<ProductResult> => {
-    try {
-      const response = await apiDeleteProduct(productId);
-      if (response.success) {
-        setProducts((prev) => prev.filter((p) => p.id !== productId));
-        toast.success("Product deleted successfully!");
-        return { success: true, data: [] };
-      }
-      return {
-        success: false,
-        error: response.error || "Failed to delete product",
-      };
-    } catch {
-      return {
-        success: false,
-        error: "An error occurred while deleting product",
-      };
-    }
-  };
+  /*************************************************
+   * DELETE PRODUCT
+   *************************************************/
+  const deleteProduct = useCallback(
+    async (productId: string) =>
+      handleApi(apiDeleteProduct, [productId], () => {
+        setProducts((p) => p.filter((item) => item.id !== productId));
+        toast.success("Product deleted!");
+      }),
+    [handleApi]
+  );
 
+  /*************************************************
+   * INITIAL LOAD
+   *************************************************/
   useEffect(() => {
-    // Abortable initial fetches
+    // abort previous
     productsAbortRef.current?.abort();
     categoriesAbortRef.current?.abort();
+
+    // new controllers
     const pCtrl = new AbortController();
     const cCtrl = new AbortController();
     productsAbortRef.current = pCtrl;
     categoriesAbortRef.current = cCtrl;
 
-    fetchAllProducts(pCtrl.signal);
-    fetchCategories(cCtrl.signal);
+    // defer async work to avoid synchronous setState in effect body
+    let mounted = true;
+    Promise.resolve().then(() => {
+      if (!mounted) return;
+      void fetchAllProducts(pCtrl.signal);
+      void fetchCategories(cCtrl.signal);
+    });
 
     return () => {
+      mounted = false;
       pCtrl.abort();
       cCtrl.abort();
     };
-  }, []);
+  }, [fetchAllProducts, fetchCategories]);
 
   return (
     <ProductContext.Provider

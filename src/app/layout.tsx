@@ -25,18 +25,13 @@ export const metadata: Metadata = {
   description: "Your one-stop shop for everything you need!",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        {/* Theme Boot Script avoids hydration mismatch */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -53,13 +48,11 @@ export default function RootLayout({
           }}
         />
 
-        <GoogleOAuthProvider
-          clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}
-        >
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
           <AuthProvider>
-            <CartProvider>
-              <FavoriteProvider>
-                <ProductProvider>
+            <ProductProvider>
+              <CartProvider>
+                <FavoriteProvider>
                   <Toaster position="top-center" />
                   <NavbarWrapper />
                   <ReviewProvider>
@@ -67,9 +60,9 @@ export default function RootLayout({
                     <MobileCartBar />
                   </ReviewProvider>
                   <SiteFooter />
-                </ProductProvider>
-              </FavoriteProvider>
-            </CartProvider>
+                </FavoriteProvider>
+              </CartProvider>
+            </ProductProvider>
           </AuthProvider>
         </GoogleOAuthProvider>
       </body>
