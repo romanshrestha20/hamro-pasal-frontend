@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, ReactNode } from "react";
 import Link from "next/link";
+import { cn } from "@/lib/utils"; // if you have a class combiner
 
 interface DropDownProps {
   trigger: React.ReactNode;
@@ -17,43 +18,43 @@ export default function DropDown({
   className = "",
 }: DropDownProps) {
   const [open, setOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  /* 🧯 Close when clicking outside */
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   return (
-    <div
-      ref={dropdownRef}
-      className={`relative inline-block text-left ${className}`}
-    >
-      {/* Trigger button */}
+    <div ref={ref} className={cn("relative inline-block", className)}>
+      {/* Trigger */}
       <button
         type="button"
         aria-haspopup="true"
+        aria-expanded={open}
         onClick={() => setOpen(!open)}
-        className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full"
+        className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         {trigger}
       </button>
 
-      {/* Dropdown menu */}
+      {/* Menu */}
       {open && (
         <div
-          className={`absolute z-50 mt-2 min-w-48 rounded-lg shadow-lg bg-white border border-gray-200 py-1 ${
+          role="menu"
+          className={cn(
+            "absolute z-50 mt-2 min-w-[12rem] rounded-lg shadow-md border",
+            "bg-card border-border text-card-foreground dropdown-animate",
+            /* Glass blur effect */
+            "backdrop-blur-md bg-card/90",
             align === "right" ? "right-0" : "left-0"
-          }`}
+          )}
         >
           {children}
         </div>
@@ -62,7 +63,8 @@ export default function DropDown({
   );
 }
 
-interface DropdownItemProps {
+/* 🎯 Reusable Item Component */
+interface ItemProps {
   children: ReactNode;
   onClick?: () => void;
   href?: string;
@@ -74,15 +76,15 @@ export function DropdownItem({
   children,
   onClick,
   href,
-  className = "",
+  className,
   icon,
-}: DropdownItemProps) {
-  const baseClasses =
-    "w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors";
+}: ItemProps) {
+  const base =
+    "flex items-center gap-2 w-full px-4 py-2 text-sm cursor-pointer transition-colors text-card-foreground hover:bg-muted focus:bg-muted focus:outline-none";
 
   if (href) {
     return (
-      <Link href={href} className={`${baseClasses} ${className}`}>
+      <Link href={href} className={cn(base, className)} role="menuitem">
         {icon && <span className="w-4 h-4">{icon}</span>}
         {children}
       </Link>
@@ -93,7 +95,8 @@ export function DropdownItem({
     <button
       type="button"
       onClick={onClick}
-      className={`${baseClasses} text-left ${className}`}
+      role="menuitem"
+      className={cn(base, className, "text-left")}
     >
       {icon && <span className="w-4 h-4">{icon}</span>}
       {children}
@@ -101,6 +104,7 @@ export function DropdownItem({
   );
 }
 
+/* ➖ Divider */
 export function DropdownDivider() {
-  return <div className="my-1 border-t border-gray-200" />;
+  return <div className="my-1 border-t border-border" role="separator" />;
 }
