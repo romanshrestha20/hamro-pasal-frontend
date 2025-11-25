@@ -11,6 +11,8 @@ export interface Category {
   name: string;
   createdAt: string;
   updatedAt: string;
+  productId: string;
+  products: Product[]
 }
 
 export interface Product {
