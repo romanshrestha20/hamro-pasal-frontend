@@ -22,6 +22,8 @@ import { ProductList } from "@/components/product/ProductList";
 
 import HomeCarousel from "@/components/layout/HomeCarousel";
 
+import LoadingState from "@/components/common/LoadingState";
+import ErrorState from "@/components/common/ErrorState";
 /* ================================================================
    PAGE: Products
 ================================================================= */
@@ -142,30 +144,22 @@ export default function ProductsPage() {
   /* ================================================================
      Loading States
   ================================================================= */
-  if (loading)
-    return (
-      <div className="flex flex-col items-center justify-center h-[50vh]">
-        <div className="w-10 h-10 border-2 border-blue-600 rounded-full border-b-transparent animate-spin" />
-        <p className="mt-4 text-gray-500">Loading products...</p>
-      </div>
-    );
+  if (loading) return <LoadingState label="Loading products..." />;
 
   if (error)
     return (
-      <div className="py-16 text-center">
-        <p className="text-lg font-semibold text-red-500">
-          Failed to load products
-        </p>
-        <p className="text-gray-500">{error}</p>
-      </div>
+      <ErrorState
+        message="Failed to load products"
+        subMessage={error}
+        onRetry={() => window.location.reload()}
+      />
     );
 
   /* ================================================================
      MAIN UI
   ================================================================= */
   return (
-    <div className="px-4 py-10 mx-auto max-w-7xl">
-      {/* ----------------- Hero Carousel ----------------- */}
+    <div className="px-4 py-10 mx-auto transition-colors max-w-7xl bg-background">
       <div className="mb-10">
         <HomeCarousel products={filteredProducts} />
       </div>

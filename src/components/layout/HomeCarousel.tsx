@@ -27,22 +27,24 @@ export default function HomeCarousel({ products }: HomeCarouselProps) {
           <Link
             href={`/products/${product.id}`}
             key={product.id}
-            className="relative flex flex-col items-center justify-center h-48 gap-2 p-4 overflow-hidden transition bg-gray-100 rounded-lg group hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700"
+            className="relative flex flex-col items-center justify-center h-48 gap-2 p-4 overflow-hidden transition-colors rounded-lg group hover:bg-muted bg-card"
             aria-label={`View ${product.name}`}
           >
             <ProductImage imageUrl={imageUrl} altText={product.name} />
 
             {/* Price (always visible) */}
             {price != null && !Number.isNaN(price) && (
-              <span className="text-sm font-semibold text-green-700 dark:text-green-400">
+              <span className="text-sm font-semibold ">
                 ${price.toFixed(2)}
               </span>
             )}
 
             {/* Hover Overlay */}
             <div
-              className="absolute bottom-3 left-2 max-w-[70%] bg-black/70 backdrop-blur-sm text-white p-2 rounded-md 
-                         opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-out space-y-1"
+              className=" absolute bottom-3 left-2 max-w-[70%] 
+                bg-accent/80 backdrop-blur-sm text-accent-foreground
+                p-2 rounded-md opacity-0 group-hover:opacity-100
+                transition-opacity duration-200 ease-out space-y-1"
               aria-hidden="true"
             >
               {/* Product Name */}
@@ -52,7 +54,7 @@ export default function HomeCarousel({ products }: HomeCarouselProps) {
 
               {/* Product Description */}
               {product.description && (
-                <p className="text-xs leading-snug text-gray-200 line-clamp-3">
+                <p className="text-xs leading-snug text-muted-foreground line-clamp-3">
                   {product.description}
                 </p>
               )}
