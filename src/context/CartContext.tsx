@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useRef,
   useCallback,
+  useMemo,
 } from "react";
 import type { Cart, CartItem, Product } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,7 +43,7 @@ export interface CartContextType {
 export const CartContext = createContext<CartContextType | null>(null);
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading: authLoading } = useAuth(); // IMPORTANT FIX
+  const { user, loading: authLoading } = useAuth();
   const { products } = useProductContext();
 
   const [cart, setCart] = useState<Cart | null>(null);
@@ -67,7 +68,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     } catch {}
   };
 
-  const items = cart?.items ?? [];
+  const items = useMemo(() => cart?.items ?? [], [cart]);
 
   // ---------------------------
   // Fetch cart for logged-in/guest
@@ -95,12 +96,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           raw?.data && (raw.data as Cart).items
             ? raw.data
             : (raw as unknown as Cart);
-        console.log(
-          "[CartContext] fetchUserCart raw=",
-          raw,
-          "cartData=",
-          cartData
-        );
         setCart(cartData);
         return { success: true, data: cartData };
       }
@@ -159,171 +154,204 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         mergedOnceRef.current = true;
       }
     })();
-  }, [authLoading, user?.id]);
+  }, [authLoading, user?.id, fetchUserCart]);
 
   // ---------------------------
   // MUTATIONS
   // ---------------------------
 
-  const addToCart = async (
-    productId: string,
-    quantity = 1
-  ): Promise<CartResult> => {
-    if (!user?.id) {
-      try {
-        const local = loadLocalCart() || {
-          id: `local-${Date.now()}`,
-          userId: "",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          items: [],
-        };
+  const addToCart = useCallback(
+    async (productId: string, quantity = 1): Promise<CartResult> => {
+      if (!user?.id) {
+        try {
+          setCart((prev) => {
+            const local = prev ||
+              loadLocalCart() || {
+                id: localStorage.getItem("hp_cart_id") ?? crypto.randomUUID(),
 
-        if (!local.items) local.items = [];
-        const existing = local.items.find((it) => it.productId === productId);
-        if (existing) {
-          existing.quantity += quantity;
-          existing.updatedAt = new Date().toISOString();
-        } else {
-          const prod = products.find((p) => p.id === productId);
-          const price = prod ? Number(prod.price) : 0;
+                userId: "",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                items: [],
+              };
 
-          const newItem: CartItem = {
-            id: `local-item-${productId}`,
-            cartId: local.id,
-            productId,
-            quantity,
-            unitPrice: price,
-            currency: "USD",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            product: prod as Product,
-          };
-
-          local.items.push(newItem);
+            if (!local.items) local.items = [];
+            const existing = local.items.find(
+              (it) => it.productId === productId
+            );
+            if (existing) {
+              existing.quantity += quantity;
+              existing.updatedAt = new Date().toISOString();
+            } else {
+              const prod = products.find((p) => p.id === productId);
+              const price = prod ? Number(prod.price) : 0;
+              const newItem: CartItem = {
+                id: `local-item-${productId}`,
+                cartId: local.id,
+                productId,
+                quantity,
+                unitPrice: price,
+                currency: "USD",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                product: prod as Product,
+              };
+              local.items.push(newItem);
+            }
+            local.updatedAt = new Date().toISOString();
+            saveLocalCart(local);
+            return { ...local };
+          });
+          return { success: true };
+        } catch {
+          return { success: false, error: "Failed to add item" };
         }
-
-        local.updatedAt = new Date().toISOString();
-        setCart(local);
-        saveLocalCart(local);
-
-        return { success: true, data: local };
-      } catch {
-        return { success: false, error: "Failed to add item" };
       }
-    }
 
-    // Authenticated
-    const response = await addItemToCart({ productId, quantity });
-    if (response.success) {
+      const response = await addItemToCart({ productId, quantity });
+      if (response.success) {
+        await fetchUserCart();
+        return { success: true, data: response.data };
+      }
+      return {
+        success: false,
+        error: response.error || "Failed to add item",
+      };
+    },
+    [user?.id, products, fetchUserCart]
+  );
+
+  const updateQty = useCallback(
+    async (itemId: string, quantity: number): Promise<CartResult> => {
+      if (!user?.id) {
+        // Guest cart quantity update
+        setCart((prev) => {
+          if (!prev) return prev;
+          const next = { ...prev, items: [...(prev.items ?? [])] };
+          const target = next.items.find((i) => i.id === itemId);
+          if (target) {
+            target.quantity = quantity;
+            target.updatedAt = new Date().toISOString();
+            next.updatedAt = new Date().toISOString();
+          }
+          saveLocalCart(next);
+          return next;
+        });
+        return { success: true };
+      }
+
+      // Optimistic update for authenticated user
+      setCart((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          items: (prev.items ?? []).map((i) =>
+            i.id === itemId ? { ...i, quantity } : i
+          ),
+        };
+      });
+
+      const item = items.find((it) => it.id === itemId);
+      if (!item) return { success: false, error: "Item not found" };
+
+      const response = await updateCartItem(itemId, {
+        productId: item.productId,
+        quantity,
+      });
+
+      if (response.success) return { success: true, data: response.data };
+
+      // Rollback on error
       await fetchUserCart();
-      return { success: true, data: response.data };
-    }
-    return { success: false, error: response.error || "Failed to add item" };
-  };
+      return {
+        success: false,
+        error: response.error || "Failed to update item",
+      };
+    },
+    [user?.id, items, fetchUserCart]
+  );
 
-const updateQty = async (
-  itemId: string,
-  quantity: number
-): Promise<CartResult> => {
-  // Optimistic UI update
-  setCart((prev) => {
-    if (!prev) return prev;
-    return {
-      ...prev,
-      items: prev.items.map((i) => (i.id === itemId ? { ...i, quantity } : i)),
-    };
-  });
+  const removeItem = useCallback(
+    async (itemId: string): Promise<CartResult> => {
+      if (!user?.id) {
+        const local = loadLocalCart();
+        if (!local) return { success: false, error: "No local cart" };
+        local.items = (local.items ?? []).filter((it) => it.id !== itemId);
+        local.updatedAt = new Date().toISOString();
+        setCart({ ...local });
+        saveLocalCart(local);
+        return { success: true };
+      }
 
-  // 2️⃣ Sync with server in background
-  const item = items.find((it) => it.id === itemId);
-  if (!item) {
-    return { success: false, error: "Item not found" };
-  }
+      const item = items.find((it) => it.id === itemId);
+      if (!item) return { success: false, error: "Item not found" };
 
-  const response = await updateCartItem(itemId, {
-    productId: item.productId,
-    quantity,
-  });
+      // Optimistic removal
+      setCart((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          items: (prev.items ?? []).filter((i) => i.id !== itemId),
+        };
+      });
 
-  // 3️⃣ Only re-fetch if server-side quantity was modified
-  if (response.success) {
-    // remove fetchUserCart() to prevent UI reloads
-    return { success: true, data: response.data };
-  }
+      const response = await deleteCartItem(item.productId);
+      if (response.success) return { success: true };
 
-  // 4️⃣ Rollback optimistic update on error
-  await fetchUserCart();
-  return { success: false, error: response.error || "Failed to update item" };
-};
-
-
-  const removeItem = async (itemId: string): Promise<CartResult> => {
-    if (!user?.id) {
-      const local = loadLocalCart();
-      if (!local) return { success: false, error: "No local cart" };
-
-      local.items = (local.items ?? []).filter((it) => it.id !== itemId);
-      local.updatedAt = new Date().toISOString();
-
-      setCart(local);
-      saveLocalCart(local);
-
-      return { success: true };
-    }
-
-    const item = items.find((it) => it.id === itemId);
-    if (!item) return { success: false, error: "Item not found" };
-    const response = await deleteCartItem(item.productId);
-    if (response.success) {
+      // Rollback
       await fetchUserCart();
-      return { success: true };
-    }
+      return {
+        success: false,
+        error: response.error || "Failed to remove item",
+      };
+    },
+    [user?.id, items, fetchUserCart]
+  );
 
-    return { success: false, error: response.error || "Failed to remove item" };
-  };
-
-  const clearCart = async (): Promise<CartResult> => {
+  const clearCart = useCallback(async (): Promise<CartResult> => {
     if (!user?.id) {
       saveLocalCart(null);
       setCart(null);
       return { success: true };
     }
-
     if (!cart?.id) return { success: false, error: "No cart to clear" };
-
     const response = await deleteCart(cart.id);
     if (response.success) {
       await fetchUserCart();
       return { success: true };
     }
-
-    return { success: false, error: response.error || "Failed to clear cart" };
-  };
+    return {
+      success: false,
+      error: response.error || "Failed to clear cart",
+    };
+  }, [user?.id, cart?.id, fetchUserCart]);
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
 
-const toNumber = (val: any) => {
-  if (val == null) return 0;
+  const toNumber = (val: unknown) => {
+    if (val == null) return 0;
 
-  // Prisma Decimal case
-  if (typeof val === "object" && "toString" in val) {
-    return parseFloat(val.toString());
-  }
+    // Prisma Decimal case
+    if (typeof val === "object" && "toString" in val) {
+      return parseFloat(val.toString());
+    }
 
-  if (typeof val === "string") return parseFloat(val);
-  if (typeof val === "number") return val;
+    if (typeof val === "string") return parseFloat(val);
+    if (typeof val === "number") return val;
 
-  return 0;
-};
+    return 0;
+  };
 
-const subtotal = items.reduce((sum, item) => {
-  const price = item.unitPrice
-    ? toNumber(item.unitPrice)
-    : toNumber(item.product?.price);
-
-  return sum + item.quantity * price;
-}, 0);
+  const subtotal = useMemo(
+    () =>
+      items.reduce((sum, item) => {
+        const price = item.unitPrice
+          ? toNumber(item.unitPrice)
+          : toNumber(item.product?.price);
+        return sum + item.quantity * price;
+      }, 0),
+    [items]
+  );
 
   return (
     <CartContext.Provider
