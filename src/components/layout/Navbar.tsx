@@ -4,12 +4,11 @@ import Link from "next/link";
 import { NavbarSearch } from "./NavbarSearch";
 import { NavbarLink } from "./NavbarLink";
 import { UserMenu } from "./UserMenu";
-import { MobileMenu } from "./MobileMenu";
-import { X } from "lucide-react";
+import { X, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import CategoriesSidebar from "./CategoriesSidebar";
-import { ChevronDown } from "lucide-react";
 import { useProductContext } from "@/context/ProductContext";
+import { ThemeToggle } from "../ui/ThemeToggle";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
@@ -17,15 +16,15 @@ export function Navbar() {
   const { categories } = useProductContext();
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b shadow-sm dark:bg-gray-900 dark:border-gray-800">
+    <nav className="sticky top-0 z-50 transition-colors border-b shadow-sm bg-background border-border">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left: Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-bright-blue-500">
-              <span className="text-xl font-bold text-white">H</span>
+            <div className="flex items-center justify-center w-8 h-8 font-bold rounded-lg bg-primary text-primary-foreground">
+              H
             </div>
-            <span className="hidden text-xl font-bold sm:block dark:text-white">
+            <span className="hidden text-xl font-bold sm:block text-foreground">
               Hamro Pasal
             </span>
           </Link>
@@ -39,22 +38,21 @@ export function Navbar() {
           <div className="items-center hidden space-x-6 md:flex">
             <NavbarLink href="/products" label="Products" />
 
+            {/* Categories Dropdown */}
             <div
               className="relative hidden md:block"
               onMouseEnter={() => setOpen(true)}
               onMouseLeave={() => setOpen(false)}
             >
-              {/* Trigger */}
               <NavbarLink href="#" label="Categories" />
 
-              {/* Dropdown */}
               {open && (
-                <div className="absolute left-0 z-50 w-56 py-2 mt-2 bg-white border rounded-lg shadow-lg dark:bg-gray-900 dark:border-gray-700">
+                <div className="absolute left-0 z-50 w-56 py-2 mt-2 transition-colors border rounded-lg shadow-lg bg-card border-border">
                   {categories.map((cat) => (
                     <Link
                       key={cat.id}
                       href={`/categories/${cat.id}`}
-                      className="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-200"
+                      className="block px-4 py-2 text-sm transition-colors text-card-foreground hover:bg-muted"
                     >
                       {cat.name}
                     </Link>
@@ -66,7 +64,7 @@ export function Navbar() {
             <NavbarLink href="/cart" label="Cart" />
           </div>
 
-          {/* MOBILE MENU BUTTON */}
+          <ThemeToggle />
           <UserMenu />
         </div>
 
@@ -81,29 +79,29 @@ export function Navbar() {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-40 bg-black/40"
+            className="fixed inset-0 z-40 transition-opacity bg-black/40"
             onClick={() => setSidebarOpen(false)}
           />
 
           <aside
             className={`
               fixed top-0 left-0 h-full w-64 z-50
-              bg-white dark:bg-gray-900 border-r dark:border-gray-700 shadow-xl
+              bg-card border-r border-border shadow-xl
               transform transition-transform duration-300
               ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
             `}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
-              <h2 className="text-lg font-semibold dark:text-white">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h2 className="text-lg font-semibold text-card-foreground">
                 Categories
               </h2>
               <button
                 aria-label="Close sidebar"
                 onClick={() => setSidebarOpen(false)}
-                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="p-2 rounded-md hover:bg-muted"
               >
-                <X size={20} />
+                <X size={20} className="text-foreground" />
               </button>
             </div>
 
