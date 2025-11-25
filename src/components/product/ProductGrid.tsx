@@ -1,4 +1,5 @@
 "use client";
+
 import { ProductCard } from "./ProductCard";
 import type { Product } from "@/lib/types";
 
@@ -24,20 +25,16 @@ export function ProductGrid({
 }: ProductGridProps) {
   if (!products || products.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-lg text-gray-500">{emptyMessage}</p>
+      <div className="py-12 text-center transition-colors">
+        <p className="text-lg text-muted-foreground">{emptyMessage}</p>
       </div>
     );
   }
-  
 
   return (
-    <div className={`grid ${gridColsMap[columns]} gap-6 ${className}`}>
+    <div className={`grid ${gridColsMap[columns]} gap-6 transition-colors ${className}`}>
       {products.map((product) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-        />
+        <ProductCard key={product.id} product={product} />
       ))}
     </div>
   );

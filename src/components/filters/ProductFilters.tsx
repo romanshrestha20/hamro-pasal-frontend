@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useProductContext } from "@/context/ProductContext";
 import CategoriesSidebar from "@/components/layout/CategoriesSidebar";
-import SortDropdown from "./SortDropdown";
+import { SortDropdown } from "./SortDropdown";
 import SearchBar from "./SearchBar";
 
 export interface FilterState {
