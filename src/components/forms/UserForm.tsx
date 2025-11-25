@@ -33,15 +33,17 @@ export default function UserForm({
     email,
     address,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state for disabling button
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    if (isSubmitting || loading) return;
     e.preventDefault();
+    if (isSubmitting || loading) return;
+
     setIsSubmitting(true);
 
     try {
@@ -62,60 +64,44 @@ export default function UserForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-4 space-y-4 bg-white shadow rounded-xl"
+      className="p-6 space-y-4 border shadow-sm  bg-card text-card-foreground border-border rounded-xl"
     >
-      <div>
-        <Input
-          label="First Name"
-          id="firstName"
-          name="firstName"
-          value={formData.firstName}
-          onChange={handleChange}
-          placeholder="Enter first name"
-          required
-        />
-      </div>
+      <Input
+        label="First Name"
+        name="firstName"
+        value={formData.firstName ?? ""}
+        onChange={handleChange}
+        placeholder="Enter first name"
+        required
+      />
 
-      <div>
-        <Input
-          label="Last Name"
-          id="lastName"
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleChange}
-          placeholder="Enter last name"
-        />
-      </div>
+      <Input
+        label="Last Name"
+        name="lastName"
+        value={formData.lastName ?? ""}
+        onChange={handleChange}
+        placeholder="Enter last name"
+      />
 
-      <div>
-        <Input
-          label="Email"
-          id="email"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Enter email"
-          required
-        />
-      </div>
+      <Input
+        label="Email"
+        name="email"
+        type="email"
+        value={formData.email ?? ""}
+        onChange={handleChange}
+        placeholder="Enter email"
+        required
+      />
 
-      <div>
-        <Input
-          label="Address"
-          id="address"
-          name="address"
-          value={formData.address}
-          onChange={handleChange}
-          placeholder="Enter address"
-        />
-      </div>
+      <Input
+        label="Address"
+        name="address"
+        value={formData.address ?? ""}
+        onChange={handleChange}
+        placeholder="Enter address"
+      />
 
-      <Button
-        label="Save Changes"
-        type="submit"
-        disabled={isSubmitting || loading}
-      >
+      <Button type="submit" disabled={isSubmitting || loading}>
         {isSubmitting || loading ? "Saving..." : "Save Changes"}
       </Button>
     </form>

@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { User } from "@/lib/types";
@@ -19,11 +20,11 @@ interface UserProfileProps {
   editable?: boolean;
   onProfileUpdated?: (newUrl: string) => void;
   avatarSize?: "sm" | "md" | "lg" | "xl";
-  children?: ReactNode; // Optional right-side content slot
-  className?: string; // Wrapper class customization
-  leftActions?: ReactNode; // Content under avatar/upload (e.g., Remove Photo)
-  rightTitle?: string; // Optional right column title
-  rightSubtitle?: string; // Optional right column subtitle
+  children?: ReactNode;
+  className?: string;
+  leftActions?: ReactNode;
+  rightTitle?: string;
+  rightSubtitle?: string;
 }
 
 const UserProfile = ({
@@ -38,17 +39,20 @@ const UserProfile = ({
   rightSubtitle,
 }: UserProfileProps) => {
   const { updateUser, refreshUser } = useAuth();
-  const [isEditing, setIsEditing] = useState(false); // Track if in edit mode
+  const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
-  // Handle user form submission
+
+  /* ----------------------------------------------------
+     Save Profile
+  ---------------------------------------------------- */
   const handleSubmit = async (formData: Partial<User>) => {
     const toastId = toast.loading("Saving changes...");
+
     try {
       const result = await updateUser(user.id, formData, {
-        onSuccess: () => {
-          router.push("/profile");
-        },
+        onSuccess: () => router.push("/profile"),
       });
+
       if (result.success) {
         toast.success("Profile updated", { id: toastId });
         setIsEditing(false);
@@ -63,19 +67,25 @@ const UserProfile = ({
       toast.error("An error occurred", { id: toastId });
     }
   };
+
+  /* ----------------------------------------------------
+     Image Upload Hook
+  ---------------------------------------------------- */
   const { previewImage, uploading, error, handleFileSelected } =
-    useProfileImage({
-      onSuccess: onProfileUpdated,
-    });
+    useProfileImage({ onSuccess: onProfileUpdated });
 
-  const displayImageSrc = previewImage || user?.profilePicture;
-  const displayName =
-    `${user?.firstName ?? "User"} ${user?.lastName ?? ""}`.trim();
+  const displayImageSrc = previewImage || user.profilePicture;
+  const displayName = `${user.firstName} ${user.lastName ?? ""}`.trim();
 
+  /* ----------------------------------------------------
+     UI
+  ---------------------------------------------------- */
   return (
     <div className={"mb-6" + (className ? ` ${className}` : "")}>
       <div className="grid items-start gap-6 md:grid-cols-[auto,1fr]">
-        {/* Left: Avatar + Upload */}
+        {/* --------------------------------------
+            LEFT — Avatar + Upload
+        --------------------------------------- */}
         <div className="flex flex-col items-center gap-3 md:items-start">
           <ProfileAvatar
             user={user}
@@ -96,20 +106,23 @@ const UserProfile = ({
           {leftActions && <div className="w-full">{leftActions}</div>}
         </div>
 
-        {/* Right: Details (or custom content) */}
+        {/* --------------------------------------
+            RIGHT — Details / Edit Form
+        --------------------------------------- */}
         <div>
           {(rightTitle || rightSubtitle) && (
             <div className="mb-4">
               {rightTitle && (
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-foreground">
                   {rightTitle}
                 </h2>
               )}
               {rightSubtitle && (
-                <p className="text-sm text-gray-600">{rightSubtitle}</p>
+                <p className="text-sm text-muted-foreground">{rightSubtitle}</p>
               )}
             </div>
           )}
+
           {isEditing ? (
             <div>
               <UserForm
@@ -121,35 +134,30 @@ const UserProfile = ({
                 onSubmit={handleSubmit}
               />
 
-              <div className="mt-3">
-                <button
+              <div className="flex gap-3 mt-3">
+                {/* Cancel */}
+                <Button
                   type="button"
-                  className="px-3 py-1 mr-2 text-sm text-gray-700 bg-gray-100 rounded"
+                  variant="secondary"
                   onClick={() => setIsEditing(false)}
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
             <>
+              {/* Profile Details */}
               {children ?? <ProfileDetails user={user} />}
+
+              {/* Edit / Logout Buttons */}
               {editable && (
-                <div className="flex gap-4 pt-6 mt-8 border-t border-gray-200">
-                  <Button
-                    label="Edit"
-                    type="button"
-                    className="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Edit
+                <div className="flex gap-4 pt-6 mt-8 border-t border-border">
+                  <Button onClick={() => setIsEditing(true)}>Edit</Button>
+
+                  <Button onClick={() => router.push("/logout")}>
+                    Sign Out
                   </Button>
-                  <Button
-                    label="Sign Out"
-                    variant="danger"
-                    onClick={() => router.push("/logout")}
-                    className="px-6 py-2 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50"
-                  />
                 </div>
               )}
             </>

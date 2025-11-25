@@ -11,8 +11,9 @@ interface DetailRowProps {
 }
 
 const DetailRow = ({ label, value }: DetailRowProps) => (
-  <p className="text-gray-600">
-    <span className="font-medium">{label}:</span> {value}
+  <p className="text-sm text-muted-foreground">
+    <span className="font-medium text-foreground">{label}:</span>{" "}
+    {value}
   </p>
 );
 
@@ -25,7 +26,6 @@ const ProfileDetails = ({ user, className = "" }: ProfileDetailsProps) => {
       {user?.email && <DetailRow label="Email" value={user.email} />}
       {user?.phone && <DetailRow label="Phone" value={user.phone} />}
       {user?.address && <DetailRow label="Address" value={user.address} />}
-      
     </div>
   );
 };

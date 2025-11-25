@@ -9,13 +9,12 @@ export const Input = ({ label, error, ...props }: InputProps) => {
   return (
     <div className="flex flex-col w-full gap-1">
       {label && (
-        <label className="text-sm font-medium text-foreground">
-          {label}
-        </label>
+        <label className="text-sm font-medium text-foreground">{label}</label>
       )}
 
       <input
         {...props}
+        value={props.value ?? ""}
         className={`
           w-full px-3 py-2 rounded-lg
           bg-input text-foreground
