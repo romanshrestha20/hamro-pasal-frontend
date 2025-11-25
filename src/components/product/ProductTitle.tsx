@@ -11,7 +11,7 @@ export function ProductTitle({
 }: ProductTitleProps) {
   return (
     <Component
-      className={`text-lg font-semibold text-gray-900 line-clamp-2 ${className}`}
+      className={`text-lg font-semibold text-foreground line-clamp-2 ${className}`}
     >
       {title}
     </Component>

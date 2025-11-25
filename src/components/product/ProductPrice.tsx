@@ -19,21 +19,18 @@ export function ProductPrice({
 
   const hasDiscount = discountPrice !== undefined && discountPrice < price;
 
-  if (hasDiscount) {
-    return (
-      <div className={`flex items-center gap-2 ${className}`}>
-        <span className="text-lg line-through text-gray-500">
-          {formatPrice(price)}
-        </span>
-        <span className="text-xl font-bold text-red-600">
-          {formatPrice(discountPrice)}
-        </span>
-      </div>
-    );
-  }
+  return hasDiscount ? (
+    <div className={`flex items-center gap-2 ${className}`}>
+      <span className="text-lg line-through text-muted-foreground">
+        {formatPrice(price)}
+      </span>
 
-  return (
-    <span className={`text-xl font-bold text-gray-900 ${className}`}>
+      <span className="text-xl font-bold text-error">
+        {formatPrice(discountPrice)}
+      </span>
+    </div>
+  ) : (
+    <span className={`text-xl font-bold text-foreground ${className}`}>
       {formatPrice(price)}
     </span>
   );

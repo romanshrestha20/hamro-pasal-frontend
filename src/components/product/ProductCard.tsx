@@ -17,9 +17,12 @@ interface ProductCardProps {
 export function ProductCard({
   product,
   showActions = true,
+  className = "",
 }: ProductCardProps) {
   const imageUrl =
-    product.image || product.images?.[0]?.url || "/placeholder-product.png";
+    product.image ||
+    product.images?.[0]?.url ||
+    "/placeholder-product.png";
 
   const price =
     typeof product.price === "string"
@@ -28,13 +31,25 @@ export function ProductCard({
 
   return (
     <div
-      className="relative flex flex-col h-full p-4 transition-shadow duration-300 border rounded-2xl border-border bg-card hover:shadow-lg group text-card-foreground"
+      className={`
+        relative flex flex-col h-full p-4 rounded-2xl border border-border 
+        bg-card text-card-foreground transition-shadow duration-300 
+        hover:shadow-lg group ${className}
+      `}
     >
-      {/* Product link + image */}
+      {/* -------------------------------
+          PRODUCT IMAGE + LINK
+      -------------------------------- */}
       <Link href={`/products/${product.id}`} className="block">
-        <ProductImage className="object-cover w-full h-40 rounded-xl"  imageUrl={imageUrl} altText={product.name} />
+        <ProductImage
+          imageUrl={imageUrl}
+          altText={product.name}
+          className="object-cover w-full h-40 rounded-xl"
+        />
 
-        {/* Details */}
+        {/* -------------------------------
+            PRODUCT INFO
+        -------------------------------- */}
         <div className="mt-3">
           <ProductTitle title={product.name} />
 
@@ -48,9 +63,11 @@ export function ProductCard({
         </div>
       </Link>
 
-      {/* Actions */}
+      {/* -------------------------------
+          ACTION BUTTONS
+      -------------------------------- */}
       {showActions && (
-        <div className="flex gap-2 mt-auto">
+        <div className="flex gap-2 pt-3 mt-auto">
           <AddToCartButton productId={product.id} />
           <FavoriteButton productId={product.id} />
         </div>
