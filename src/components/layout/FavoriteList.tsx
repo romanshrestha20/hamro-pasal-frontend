@@ -19,7 +19,6 @@ export default function FavoriteList() {
 
       <ProductGrid
         products={products}
-        onAddToCart={(product) => console.log("Add to cart:", product)}
       />
     </div>
   );

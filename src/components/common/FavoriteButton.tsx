@@ -33,7 +33,7 @@ export const FavoriteButton = ({
       type="button"
       onClick={handleToggleFavorite}
       aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
-      className="absolute top-3 right-3"
+     
     >
       <Heart
         className={`h-6 w-6 transition ${
