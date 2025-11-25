@@ -20,11 +20,12 @@ export default function SortDropdown({
   ];
 
   return (
-    <div className={`relative inline-block w-1/2 ${className}`}>
+    <div className={`relative inline-block w-1/2 ${className || ""}`}>
       <select
+        aria-label="Sort products"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-md appearance-none dark:bg-gray-800 dark:border-gray-700"
+        className="block w-full px-4 py-2 pr-10 text-sm border rounded-md shadow-sm appearance-none border-border bg-card text-card-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -32,7 +33,7 @@ export default function SortDropdown({
           </option>
         ))}
       </select>
-      <ChevronDown className="absolute w-5 h-5 text-gray-500 pointer-events-none left-33 top-2" />
+      <ChevronDown className="absolute w-4 h-4 -translate-y-1/2 pointer-events-none right-3 top-1/2 text-muted-foreground" />
     </div>
   );
 }
