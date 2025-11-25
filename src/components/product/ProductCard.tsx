@@ -44,7 +44,7 @@ export function ProductCard({
         <ProductImage
           imageUrl={imageUrl}
           altText={product.name}
-          className="object-cover w-full h-40 rounded-xl"
+
         />
 
         {/* -------------------------------
