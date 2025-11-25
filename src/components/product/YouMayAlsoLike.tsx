@@ -8,16 +8,12 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 interface YouMayAlsoLikeProps {
   products: Product[];
-  onAddToCart: (product: Product) => void;
-  onWishList?: (product: Product) => void;
   categoryId?: string;
   productId: string;
 }
 
 export default function YouMayAlsoLike({
   products,
-  onAddToCart,
-  onWishList,
   categoryId,
   productId,
 }: YouMayAlsoLikeProps) {
@@ -87,11 +83,7 @@ export default function YouMayAlsoLike({
               key={product.id}
               className="flex-[0_0_75%] sm:flex-[0_0_40%] md:flex-[0_0_30%] lg:flex-[0_0_22%] min-w-0"
             >
-              <ProductCard
-                onWishList={() => onWishList?.(product)}
-                product={product}
-                onAddToCart={() => onAddToCart(product)}
-              />
+              <ProductCard product={product} />
             </div>
           ))}
         </div>

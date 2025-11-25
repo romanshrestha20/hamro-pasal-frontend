@@ -19,23 +19,21 @@ import ReviewList from "../review/ReviewList";
 import ReviewForm from "../review/ReviewForm";
 import { AddToCartButton } from "../common/AddToCartButton";
 import { FavoriteButton } from "../common/FavoriteButton";
+import { s } from "framer-motion/m";
 // Removed stray events import
 
 interface ProductDetailProps {
   product: Product;
-  onAddToCart?: (product: Product, quantity: number) => void;
-  onWishList?: (product: Product) => void;
+
   relatedProducts?: Product[];
 }
 
 export function ProductDetail({
   product,
-  onAddToCart,
-  onWishList,
   relatedProducts,
 }: ProductDetailProps) {
-  // addToCart not needed directly; AddToCartButton handles logic
-  useCart();
+  // Access cart context for addToCart callback
+  const { addToCart } = useCart();
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -115,7 +113,10 @@ export function ProductDetail({
             <AddToCartButton
               productId={product.id}
               quantity={quantity}
-              onAddToCart={() => setAddedToCart(true)}
+              onAddToCart={async (id, qty) => {
+                await addToCart(id, qty);
+                setAddedToCart(true);
+              }}
             />
 
             {addedToCart && (
@@ -139,8 +140,6 @@ export function ProductDetail({
       <section className="pt-12 space-y-10 border-t border-border">
         <YouMayAlsoLike
           products={relatedProducts ?? []}
-          onAddToCart={(p) => onAddToCart?.(p, 1)}
-          onWishList={onWishList}
           categoryId={product.categories?.[0]?.id}
           productId={product.id}
         />
