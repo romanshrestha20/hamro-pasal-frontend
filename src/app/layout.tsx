@@ -12,16 +12,24 @@ import { ReviewProvider } from "@/context/ReviewContext";
 import { Toaster } from "react-hot-toast";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
 import { Footer as SiteFooter } from "@/components/layout/Footer";
+import MobileCartBar from "@/components/cart/MobileCartBar";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "Hamro Pasal",
   description: "Your one-stop shop for everything you need!",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -45,7 +53,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
 
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+        <GoogleOAuthProvider
+          clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}
+        >
           <AuthProvider>
             <CartProvider>
               <FavoriteProvider>
@@ -53,7 +63,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <Toaster position="top-center" />
                   <NavbarWrapper />
                   <ReviewProvider>
-                    <main className="min-h-screen">{children}</main>
+                    <main className="min-h-screen pb-16">{children}</main>
+                    <MobileCartBar />
                   </ReviewProvider>
                   <SiteFooter />
                 </ProductProvider>
