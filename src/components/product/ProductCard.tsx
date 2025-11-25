@@ -28,11 +28,11 @@ export function ProductCard({
 
   return (
     <div
-      className="relative p-4 transition-shadow duration-300 border  rounded-2xl border-border bg-card hover:shadow-lg group text-card-foreground"
+      className="relative flex flex-col h-full p-4 transition-shadow duration-300 border rounded-2xl border-border bg-card hover:shadow-lg group text-card-foreground"
     >
       {/* Product link + image */}
       <Link href={`/products/${product.id}`} className="block">
-        <ProductImage imageUrl={imageUrl} altText={product.name} />
+        <ProductImage className="object-cover w-full h-40 rounded-xl"  imageUrl={imageUrl} altText={product.name} />
 
         {/* Details */}
         <div className="mt-3">
@@ -50,7 +50,7 @@ export function ProductCard({
 
       {/* Actions */}
       {showActions && (
-        <div className="flex gap-2 mt-3">
+        <div className="flex gap-2 mt-auto">
           <AddToCartButton productId={product.id} />
           <FavoriteButton productId={product.id} />
         </div>
