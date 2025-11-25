@@ -118,7 +118,7 @@ export default function CartItemRow({ item }: { item: CartItem }) {
             <X size={18} />
           </Button>
         </div>
-        <FavoriteButton productId={item.id} />
+        {product?.id && <FavoriteButton productId={product.id} />}
       </div>
     </div>
   );
