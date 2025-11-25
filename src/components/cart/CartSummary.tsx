@@ -9,71 +9,75 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function CartSummary() {
   const { totalItems, subtotal, loading } = useCart();
-  const { isAuthenticated } = useAuth(); // assuming useAuth hook exists
+  const { isAuthenticated } = useAuth();
   const [promo, setPromo] = useState("");
 
   const discount = 0; // placeholder for promo logic
   const total = Math.max(0, subtotal - discount);
+
   const formatCurrency = (v: number) => v.toFixed(2);
 
   return (
-    <aside className="w-full p-6 bg-white border rounded-lg shadow-lg">
+    <aside className="w-full p-6 transition-colors border rounded-lg shadow-lg border-border bg-card text-card-foreground">
       <Header title="Order Summary" />
 
       <div className="mt-4 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Items</span>
-          <span className="font-medium text-gray-900">{totalItems}</span>
+          <span className="text-sm text-muted-foreground">Items</span>
+          <span className="font-medium text-foreground">{totalItems}</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Subtotal</span>
-          <span className="font-medium text-gray-900">
+          <span className="text-sm text-muted-foreground">Subtotal</span>
+          <span className="font-medium text-foreground">
             ${formatCurrency(subtotal)}
           </span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Discount</span>
-          <span className="font-medium text-gray-900">
+          <span className="text-sm text-muted-foreground">Discount</span>
+          <span className="font-medium text-error">
             -${discount.toFixed(2)}
           </span>
         </div>
 
-        <div className="pt-3 border-t">
+        <div className="pt-3 border-t border-border">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Total</span>
-            <span className="text-lg font-semibold text-gray-900">
+            <span className="text-sm text-muted-foreground">Total</span>
+            <span className="text-lg font-semibold text-foreground">
               ${total.toFixed(2)}
             </span>
           </div>
         </div>
 
+        {/* Promo Input */}
         <div className="mt-4">
-          <label className="block text-xs text-gray-500">Promo code</label>
+          <label className="block text-xs text-muted-foreground">Promo code</label>
           <div className="flex gap-2 mt-2">
             <input
               value={promo}
               onChange={(e) => setPromo(e.target.value)}
               placeholder="Enter code"
-              className="flex-1 px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-bright-blue-300"
+              className="flex-1 px-3 py-2 transition-colors border rounded-md  bg-background text-foreground border-input focus:outline-none focus:ring-2 focus:ring-primary/40 placeholder:text-muted-foreground"
             />
             <Button
-              onClick={() => {
-                /* apply promo - placeholder */
-              }}
-              className="px-4 py-2 text-white rounded-md bg-bright-blue-600"
+              onClick={() => {}}
+              className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Apply
             </Button>
           </div>
         </div>
 
+        {/* Checkout Button */}
         <div className="flex flex-col gap-3 mt-4">
           <button
-            className={`w-full py-3 rounded-xl font-medium text-white 
-      bg-black hover:bg-gray-900 active:scale-[0.98]
-      transition-all duration-200 shadow-sm`}
+            className="
+              w-full py-3 rounded-xl font-medium shadow-sm
+              bg-primary text-primary-foreground hover:bg-primary/90
+              active:scale-[0.98] transition-all duration-200
+              disabled:opacity-60 disabled:cursor-not-allowed
+            "
             disabled={loading || totalItems === 0}
             onClick={() => {
               toast.error(
@@ -85,7 +89,7 @@ export default function CartSummary() {
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <span className="w-4 h-4 border-2 border-white rounded-full border-t-transparent animate-spin" />
+                <span className="w-4 h-4 border-2 rounded-full border-primary-foreground border-t-transparent animate-spin" />
                 Processing...
               </span>
             ) : (
