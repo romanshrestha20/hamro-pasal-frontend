@@ -127,6 +127,8 @@ export function ProductDetail({
                 View Cart
               </Button>
             )}
+            <FavoriteButton productId={product.id} />
+
             <div role="status" aria-live="polite" className="sr-only">
               {isFavorited ? "Favorited" : "Not favorited"};{" "}
               {addedToCart ? "Added to cart" : "Not added to cart"}
