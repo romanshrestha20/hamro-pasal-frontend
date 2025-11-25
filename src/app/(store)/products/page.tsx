@@ -4,14 +4,11 @@ export const dynamic = "force-dynamic";
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
 import { useProductContext } from "@/context/ProductContext";
-import { useCart } from "@/context/CartContext";
-import { useFavorite } from "@/context/FavoriteContext";
-
 import toast from "react-hot-toast";
-
-import ProductFilters, { FilterState } from "@/components/filters/ProductFilters";
+import ProductFilters, {
+  FilterState,
+} from "@/components/filters/ProductFilters";
 import CategoriesSidebar from "@/components/layout/CategoriesSidebar";
 import ViewModeToggle from "@/components/filters/ViewModeToggle";
 import ActiveFiltersBar from "@/components/filters/ActiveFilterBar";
@@ -24,6 +21,8 @@ import HomeCarousel from "@/components/layout/HomeCarousel";
 
 import LoadingState from "@/components/common/LoadingState";
 import ErrorState from "@/components/common/ErrorState";
+import Pagination from "@/components/common/Pagination";
+import { usePagination } from "@/hooks/usePagination";
 /* ================================================================
    PAGE: Products
 ================================================================= */
@@ -141,6 +140,10 @@ export default function ProductsPage() {
     return list;
   }, [products, filters, selectedCategory]);
 
+  const { page, setPage, paginated, totalPages } = usePagination(
+    filteredProducts,
+    12
+  );
   /* ================================================================
      Loading States
   ================================================================= */
@@ -215,12 +218,21 @@ export default function ProductsPage() {
               onClearCategory={() => setSelectedCategory(null)}
             />
           ) : viewMode === "grid" ? (
-            <ProductGrid products={filteredProducts} columns={4} />
+            <ProductGrid products={paginated} columns={4} />
           ) : (
-            <ProductList products={filteredProducts} />
+            <ProductList products={paginated} />
           )}
         </div>
       </div>
+      {totalPages > 1 && (
+        <div className="mt-10">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </div>
+      )}
     </div>
   );
 }
