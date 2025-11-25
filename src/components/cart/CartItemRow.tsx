@@ -87,7 +87,7 @@ export default function CartItemRow({ item }: { item: CartItem }) {
             <Minus size={16} />
           </Button>
 
-          <div className="px-3 py-1 text-sm font-medium text-gray-700 min-w-[2rem] text-center">
+          <div className="px-3 py-1 text-sm font-medium text-center text-gray-700 min-w-8">
             {item.quantity}
           </div>
 
