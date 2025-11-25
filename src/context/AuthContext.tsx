@@ -161,7 +161,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           } catch {}
           setAuthToken(token);
         }
-        toast.success("Login successful!");
         await refreshUser(); //  update global auth state
         router.push("/products");
         options?.onSuccess?.(user);
@@ -338,7 +337,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           } catch {}
           setAuthToken(token);
         }
-        toast.success("Login successful!");
         await refreshUser();
         router.push("/products");
         return { success: true, user: result.user };
