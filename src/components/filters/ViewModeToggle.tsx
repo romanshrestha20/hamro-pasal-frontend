@@ -12,17 +12,25 @@ interface Props {
 export default function ViewModeToggle({ className, mode, onChange }: Props) {
   return (
     <div
-      className={`flex gap-2 px-1 rounded-lg bg-soft-lavender-200 dark:bg-gray-800 ${className}`}
+      className={`flex gap-2 px-1 rounded-lg bg-secondary text-card-foreground border border-border ${className}`}
     >
       <Button
-        className={mode === "grid" ? "bg-bright-blue-500 text-white" : ""}
+        className={
+          mode === "grid"
+            ? "bg-primary text-primary-foreground"
+            : "text-muted-foreground"
+        }
         onClick={() => onChange("grid")}
       >
         <Grid3x3 className="w-4 h-4" /> Grid
       </Button>
 
       <Button
-        className={mode === "list" ? "bg-bright-blue-500 text-white" : ""}
+        className={
+          mode === "list"
+            ? "bg-primary text-primary-foreground"
+            : "text-muted-foreground"
+        }
         onClick={() => onChange("list")}
       >
         <List className="w-4 h-4" /> List

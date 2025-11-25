@@ -1,33 +1,35 @@
 import { ShoppingCart } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { AddToCartButton } from "@/components/common/AddToCartButton";
 
 interface ProductActionsProps {
-  onAddToCart: () => void;
+  productId: string;
+  quantity?: number;
+  onAddToCart?: (productId: string, quantity: number) => void;
   className?: string;
   showLabels?: boolean;
 }
 
 export function ProductActions({
+  productId,
+  quantity = 1,
   onAddToCart,
   className = "",
   showLabels = false,
 }: ProductActionsProps) {
-  const handleAddToCart = () => {
-    // Prefer caller's handler (e.g., ProductCard) which knows the product id
-    onAddToCart();
-  };
-
   return (
     <div className={`flex gap-2 ${className}`}>
-      <Button
-        onClick={handleAddToCart}
-        label="Add to Cart"
-        className="flex-1"
-        aria-label="Add to cart"
-      >
-        <ShoppingCart className="w-4 h-4" />
-        {showLabels && <span className="ml-2">Add to Cart</span>}
-      </Button>
+      <AddToCartButton
+        productId={productId}
+        quantity={quantity}
+        className="inline-flex items-center gap-2"
+        onAddToCart={onAddToCart}
+      />
+      {showLabels && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <ShoppingCart className="w-4 h-4" />
+          <span>Add to Cart</span>
+        </div>
+      )}
     </div>
   );
 }

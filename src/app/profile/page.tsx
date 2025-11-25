@@ -3,10 +3,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { UserProfile } from "@/components/user";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-
-import { Button } from "@/components/ui/Button";
-import UserForm from "@/components/forms/UserForm";
 
 export default function ProfilePage() {
   const { user, loading, isAuthenticated, refreshUser } = useAuth();

@@ -9,29 +9,19 @@ import type { Product } from "@/lib/types";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/hooks/useAuth";
 import { FavoriteButton } from "../common/FavoriteButton";
+import { AddToCartButton } from "../common/AddToCartButton";
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart?: () => void;
   showActions?: boolean;
-  onWishList?: (product: Product) => void;
   className?: string;
 }
 
 export function ProductCard({
   product,
-  onAddToCart,
   showActions = true,
-  onWishList,
 }: ProductCardProps) {
-  const { isAuthenticated } = useAuth();
-  const { addToCart } = useCart();
 
-  // Compose add-to-cart handler: prefer prop, else use context
-  const handleAddToCart = () => {
-    if (onAddToCart) return onAddToCart();
-    return addToCart(product.id, 1);
-  };
 
   // Determine image URL and price
   const imageUrl =
@@ -46,8 +36,6 @@ export function ProductCard({
       {/* Product link and image */}
       <Link href={`/products/${product.id}`} className="block">
         <ProductImage imageUrl={imageUrl} altText={product.name} />
-
-        <FavoriteButton productId={product.id} />
 
         {/* )} */}
 
@@ -67,7 +55,8 @@ export function ProductCard({
       {showActions && (
         <div className="flex gap-2 mt-3">
           {/* prefer a passed handler so pages can override (analytics, toasts), else use cart context */}
-          <ProductActions onAddToCart={handleAddToCart} />
+          <AddToCartButton productId={product.id} />
+          <FavoriteButton productId={product.id} />
         </div>
       )}
     </div>

@@ -81,13 +81,13 @@ export default function ProductDetailPage() {
           <p className="text-lg font-semibold text-red-600">
             {error || "Product not found"}
           </p>
-          <button
+          <Button
             onClick={() => router.push("/products")}
             className="inline-flex items-center gap-2 px-4 py-2 mt-4 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Products
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -97,7 +97,6 @@ export default function ProductDetailPage() {
     <div className="container px-4 py-8 mx-auto">
       {/* Back Button */}
       <Button
-        label="Back"
         onClick={() => router.back()}
         className="inline-flex items-center gap-2 mb-6 text-gray-600 transition-colors hover:text-gray-900"
       >

@@ -20,7 +20,6 @@ import EmptyState from "@/components/filters/EmptyState";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ProductList } from "@/components/product/ProductList";
 
-import type { Product } from "@/lib/types";
 import HomeCarousel from "@/components/layout/HomeCarousel";
 
 /* ================================================================
@@ -31,8 +30,6 @@ export default function ProductsPage() {
 
   const { products, categories, loading, error } = useProductContext();
   const { fetchProductsByCategory, fetchAllProducts } = useProductContext();
-  const { addToCart } = useCart();
-  const { addFavorite } = useFavorite();
 
   /* ================================================================
      Search Query from URL
@@ -73,23 +70,6 @@ export default function ProductsPage() {
      View Mode
   ================================================================= */
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-
-  /* ================================================================
-     Cart + Wishlist Actions
-  ================================================================= */
-  const handleAddToCart = async (product: Product) => {
-    const res = await addToCart(product.id, 1);
-    res.success
-      ? toast.success(`${product.name} added to cart!`)
-      : toast.error(res.error);
-  };
-
-  const handleWishList = async (product: Product) => {
-    const res = await addFavorite(product.id);
-    res.success
-      ? toast.success(`${product.name} added to wishlist!`)
-      : toast.error(res.error);
-  };
 
   /* ================================================================
      Clear Search
@@ -173,7 +153,9 @@ export default function ProductsPage() {
   if (error)
     return (
       <div className="py-16 text-center">
-        <p className="text-lg font-semibold text-red-500">Failed to load products</p>
+        <p className="text-lg font-semibold text-red-500">
+          Failed to load products
+        </p>
         <p className="text-gray-500">{error}</p>
       </div>
     );
@@ -183,7 +165,6 @@ export default function ProductsPage() {
   ================================================================= */
   return (
     <div className="px-4 py-10 mx-auto max-w-7xl">
-
       {/* ----------------- Hero Carousel ----------------- */}
       <div className="mb-10">
         <HomeCarousel products={filteredProducts} />
@@ -191,9 +172,9 @@ export default function ProductsPage() {
 
       {/* ----------------- Top Filter Controls ----------------- */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Products</h2>
+        <h2 className="text-2xl font-bold text-foreground">Products</h2>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 p-2 bg-card text-card-foreground">
           <ViewModeToggle mode={viewMode} onChange={setViewMode} />
 
           <ProductFilters
@@ -222,7 +203,6 @@ export default function ProductsPage() {
 
       {/* ----------------- Main Layout ----------------- */}
       <div className="flex gap-6">
-
         {/* Sidebar */}
         <div className="hidden lg:block">
           <CategoriesSidebar
@@ -241,21 +221,11 @@ export default function ProductsPage() {
               onClearCategory={() => setSelectedCategory(null)}
             />
           ) : viewMode === "grid" ? (
-            <ProductGrid
-              products={filteredProducts}
-              onAddToCart={handleAddToCart}
-              onWishList={handleWishList}
-              columns={4}
-            />
+            <ProductGrid products={filteredProducts} columns={4} />
           ) : (
-            <ProductList
-              products={filteredProducts}
-              onAddToCart={handleAddToCart}
-              onWishList={handleWishList}
-            />
+            <ProductList products={filteredProducts} />
           )}
         </div>
-
       </div>
     </div>
   );

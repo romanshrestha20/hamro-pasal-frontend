@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui";
 import type { Product } from "@/lib/types";
 import { useFavorite } from "@/context/FavoriteContext";
@@ -13,12 +12,13 @@ import {
   ImageGallery,
   RatingStars,
   StockStatus,
-  TagsList,
   CategoriesList,
   QuantitySelector,
 } from "./partials";
 import ReviewList from "../review/ReviewList";
 import ReviewForm from "../review/ReviewForm";
+import { AddToCartButton } from "../common/AddToCartButton";
+import { FavoriteButton } from "../common/FavoriteButton";
 // Removed stray events import
 
 interface ProductDetailProps {
@@ -34,11 +34,12 @@ export function ProductDetail({
   onWishList,
   relatedProducts,
 }: ProductDetailProps) {
-  const { addToCart } = useCart();
+  // addToCart not needed directly; AddToCartButton handles logic
+  useCart();
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const { toggleFavorite, isFavoritedLocal } = useFavorite();
+  const { isFavoritedLocal } = useFavorite();
   const [addedToCart, setAddedToCart] = useState(false);
   const isFavorited = isFavoritedLocal(product.id);
 
@@ -60,21 +61,12 @@ export function ProductDetail({
     [product.images, product.image]
   );
 
-  const handleAddToCart = async () => {
-    if (onAddToCart) {
-      onAddToCart(product, quantity);
-    } else {
-      await addToCart(product.id, quantity);
-    }
-    setAddedToCart(true);
-  };
-
   return (
-    <div className="space-y-16 animate-fade-in">
-      {/* Main Product Layout */}
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-        {/* Left: Gallery */}
-        <div className="p-4 transition-all duration-300 border shadow-lg rounded-2xl bg-white/60 dark:bg-neutral-900/60 backdrop-blur-sm border-neutral-200/60 dark:border-neutral-800/60">
+    <div className="space-y-16">
+      {/* Layout */}
+      <div className="grid gap-10 lg:grid-cols-[1fr_1fr]">
+        {/* Gallery */}
+        <div className="p-4 border rounded-xl border-border bg-card shadow-card backdrop-blur-sm">
           <ImageGallery
             images={images}
             productName={product.name}
@@ -82,45 +74,36 @@ export function ProductDetail({
             onSelect={setSelectedImage}
           />
         </div>
-
-        {/* Right: Product Info */}
-        <div className="px-2 space-y-8">
-          {/* Title + Rating */}
-          <header className="space-y-3">
-            <h1 className="text-4xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+        {/* Info */}
+        <div className="space-y-10">
+          <header className="space-y-4">
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
               {product.name}
             </h1>
-
             {product.rating > 0 && (
               <div className="flex items-center gap-3">
                 <RatingStars rating={product.rating} />
-                <span className="text-sm text-gray-600 dark:text-gray-300">
+                <span className="text-sm text-muted-foreground">
                   {product.rating.toFixed(1)} / 5.0
                 </span>
               </div>
             )}
           </header>
-
-          {/* Pricing + Stock */}
-          <section className="py-6 space-y-3 border-y border-neutral-200 dark:border-neutral-700">
-            <div className="text-4xl font-bold text-gray-900 dark:text-gray-100">
+          <section className="py-6 space-y-4 border-y border-border">
+            <div className="text-3xl font-bold text-foreground md:text-4xl">
               ${price.toFixed(2)}
             </div>
             <StockStatus stock={product.stock} />
           </section>
-
-          {/* Description */}
-          <section className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-            <h2 className="mb-3 text-xl font-semibold text-gray-900 dark:text-gray-100">
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-foreground">
               Description
             </h2>
-            <p className="opacity-90">{product.description}</p>
+            <p className="text-base leading-relaxed text-muted-foreground">
+              {product.description}
+            </p>
           </section>
-
-          {/* Tags + Categories */}
           <CategoriesList categories={product.categories} />
-
-          {/* Quantity Selector */}
           {product.stock > 0 && (
             <QuantitySelector
               quantity={quantity}
@@ -128,44 +111,18 @@ export function ProductDetail({
               onChange={setQuantity}
             />
           )}
+          <div className="flex flex-wrap gap-3 pt-2">
+            <AddToCartButton
+              productId={product.id}
+              quantity={quantity}
+              onAddToCart={() => setAddedToCart(true)}
+            />
 
-          {/* Actions */}
-          <div className="flex flex-wrap gap-4 pt-4">
-            <Button
-              onClick={handleAddToCart}
-              disabled={product.stock === 0}
-              className="flex-1 h-12 text-lg transition-all shadow-md hover:shadow-lg rounded-xl"
-            >
-              <ShoppingCart className="w-6 h-6 mr-2" />
-              {addedToCart ? "Added" : "Add to Cart"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                toggleFavorite(product.id);
-                onWishList?.(product);
-              }}
-              aria-label={
-                isFavorited ? "Remove from favorites" : "Add to favorites"
-              }
-              aria-pressed={isFavorited}
-              className="h-12 px-5 text-lg rounded-xl border-neutral-300 hover:border-neutral-400 dark:border-neutral-700"
-            >
-              <Heart
-                className={
-                  "w-6 h-6 transition-colors " +
-                  (isFavorited
-                    ? "text-red-600"
-                    : "text-gray-600 dark:text-gray-300")
-                }
-                style={{ fill: isFavorited ? "currentColor" : "none" }}
-              />
-            </Button>
             {addedToCart && (
               <Button
                 variant="secondary"
                 onClick={() => router.push("/cart")}
-                className="h-12 px-5 text-lg shadow-sm rounded-xl"
+                className="px-5 py-3 text-sm md:text-base"
               >
                 View Cart
               </Button>
@@ -177,9 +134,7 @@ export function ProductDetail({
           </div>
         </div>
       </div>
-
-      {/* YOU MAY ALSO LIKE */}
-      <section className="pt-12 mt-12 border-t border-neutral-300 dark:border-neutral-700">
+      <section className="pt-12 space-y-10 border-t border-border">
         <YouMayAlsoLike
           products={relatedProducts ?? []}
           onAddToCart={(p) => onAddToCart?.(p, 1)}
@@ -188,16 +143,10 @@ export function ProductDetail({
           productId={product.id}
         />
       </section>
-
-      <div>
-        {/* existing product UI */}
-        <section className="pt-12 mt-12 border-t border-neutral-300 dark:border-neutral-700">
-          <ReviewForm productId={product.id} />
-          <div className="mt-6">
-            <ReviewList productId={product.id} />
-          </div>
-        </section>
-      </div>
+      <section className="pt-12 space-y-8 border-t border-border">
+        <ReviewForm productId={product.id} />
+        <ReviewList productId={product.id} />
+      </section>
     </div>
   );
 }
