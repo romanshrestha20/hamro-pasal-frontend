@@ -1,136 +1,91 @@
 @import "tailwindcss";
 
+/* ------------------------------
+   Light Mode (Default)
+-------------------------------- */
 :root {
-  /* Primary Palette - Elegant & Calm */
-    --brand: #61c9a8;
-    --brand-light: #7fd3b9;
-    --brand-dark: #3cb08c;
+  --background: #ffffff;
+    --foreground: #111111;
+  --card: #ffffff;
+    --card-foreground: #111111;
+  --muted: #f5f5f5;
+    --muted-foreground: #666666;
+  --border: #e5e5e5;
+    --input: #e5e5e5;
+  --primary: #111111;
+    /* pure black */
+    --primary-foreground: #ffffff;
+  --secondary: #f8f8f8;
+    --secondary-foreground: #111111;
   
-    /* Accent Colors */
-    --accent-primary: #a53860;
-    --accent-secondary: #4c3b4d;
-    --accent-tertiary: #ada8b6;
+    --accent: #000000;
+    --accent-foreground: #ffffff;
   
-    /* Neutral Palette */
-    --background: #171717;
-    --foreground: #4c3b4d;
-    --surface: #ffffff;
-    --border: #ada8b6;
-    --muted: #ada8b6;
-    --subtle: #dfdde2;
-  
-    /* Extended Color System */
-    --rose-quartz: #ada8b6;
-    --antique-white: #ffeedb;
-    --english-violet: #4c3b4d;
-    --raspberry-rose: #a53860;
-    --mint: #61c9a8;
-  
-    /* Alternative Palette */
-    --pomp-power: #8d6a9f;
-    --french-gray: #c5cbd3;
-    --cambridge-blue: #8cbcb9;
-    --hunyadi-yellow: #dda448;
-    --persian-red: #bb342f;
-  
-    /* Typography */
-    --font-geist-sans: 'Geist Sans', -apple-system, BlinkMachineSystemFont, 'Segoe UI', Roboto, Oxygen,
-      Ubuntu,
-        Cantarell,
-        'Open Sans',
-        'Helvetica Neue',
-        sans-serif;
+    --success: #22c55e;
+    --error: #ef4444;
+    --warning: #f59e0b;
 }
 
+/* ------------------------------
+   Dark Mode
+-------------------------------- */
+.dark {
+  --background: #0b0b0b;
+  --foreground: #f9f9f9;
+
+  --card: #111111;
+  --card-foreground: #f9f9f9;
+
+  --muted: #1a1a1a;
+  --muted-foreground: #8c8c8c;
+
+  --border: #2a2a2a;
+  --input: #2a2a2a;
+
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ffffff;
+
+  --accent: #ffffff;
+  --accent-foreground: #000000;
+}
+
+/* ------------------------------
+   Tailwind Design Tokens
+-------------------------------- */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
-    --color-brand: var(--brand);
-    --color-accent: var(--accent-primary);
+
+  --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+    --color-input: var(--input);
+  --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+    --color-error: var(--error);
+    --color-warning: var(--warning);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --surface: #1a1d2e;
-      --foreground: #f9fafb;
-      --border: #374151;
-      --muted: #9ca3af;
-      --accent: #252d3f;
-      --brand: #5ba3f5;
-      --brand-dark: #4392f1;
+    --font-mono: var(--font-geist-mono);
   }
-}
-
+/* ------------------------------
+   Global Utilities
+-------------------------------- */
 * {
   scroll-behavior: smooth;
 }
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-  
-  /* Custom scrollbar for webkit browsers */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  
-  ::-webkit-scrollbar-track {
-    background: var(--subtle);
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background: var(--muted);
-    border-radius: 4px;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--brand);
-  }
-  
-  /* Selection styling */
-  ::selection {
-    background-color: var(--brand);
-    color: white;
-  }
-  
-  ::-moz-selection {
-    background-color: var(--brand);
-    color: white;
-  }
-  
-  /* Focus visible for accessibility */
-  :focus-visible {
-    outline: 2px solid var(--brand);
-    outline-offset: 2px;
-  }
-  
-  /* Smooth transitions for interactive elements */
-  button,
-  a,
-  input,
-  textarea,
-  select {
-    transition: all 0.2s ease-in-out;
-  }
-  
-  /* Reduce motion for users who prefer it */
-  @media (prefers-reduced-motion: reduce) {
-  
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
+
+html,
+body,
+* {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }

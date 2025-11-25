@@ -1,77 +1,52 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+const config = {
   darkMode: "class",
   content: [
-    "./app/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
     "./pages/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
   ],
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        lg: "1200px",
-        xl: "1400px",
-      },
-    },
-
     extend: {
       colors: {
-        // Light Theme
-        light: {
-          bg: "#FFFFFF",
-          card: "#F9F9F9",
-          border: "#E0E0E0",
-          text: "#333333",
-          subtle: "#666666",
-        },
+        background: "var(--background)",
+        foreground: "var(--foreground)",
 
-        // Dark Theme
-        dark: {
-          bg: "#121212",
-          card: "#1A1A1A",
-          border: "#2A2A2A",
-          text: "#FAFAFA",
-          subtle: "#CCCCCC",
-        },
+        card: "var(--card)",
+        "card-foreground": "var(--card-foreground)",
 
-        // Accents (Shared)
-        primary: {
-          light: "#1E90FF", // trust building (blue)
-          dark: "#00BFA6", // teal option for modern feel
-        },
-        secondary: {
-          light: "#FF6F00", // orange - urgency / CTA
-          dark: "#FF4081", // pink/red strong CTA for dark mode
-        },
+        muted: "var(--muted)",
+        "muted-foreground": "var(--muted-foreground)",
 
-        highlight: {
-          light: "#FFF176", // soft yellow for promo & banners
-          dark: "#FFD700", // gold - premium feel
-        },
+        border: "var(--border)",
+        input: "var(--input)",
 
-        success: "#00C853", // emerald
-        error: "#FF1744", // bright red
-        warning: "#FFB300", // amber
+        primary: "var(--primary)",
+        "primary-foreground": "var(--primary-foreground)",
+
+        secondary: "var(--secondary)",
+        "secondary-foreground": "var(--secondary-foreground)",
+
+        accent: "var(--accent)",
+        "accent-foreground": "var(--accent-foreground)",
+
+        success: "var(--success)",
+        error: "var(--error)",
+        warning: "var(--warning)",
       },
 
       borderRadius: {
         xl: "1rem",
-        "2xl": "1.5rem",
+        "2xl": "1.25rem",
+        "3xl": "1.75rem",
       },
 
       boxShadow: {
-        soft: "0 6px 24px rgba(0,0,0,0.06)",
-        card: "0 8px 30px rgba(0,0,0,0.08)",
-        hover: "0 10px 40px rgba(0,0,0,0.12)",
-      },
-
-      fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        soft: "0 4px 20px rgba(0,0,0,0.06)",
+        card: "0 2px 12px rgba(0,0,0,0.04)",
       },
     },
   },
   plugins: [],
 };
+
+export default config;
