@@ -1,55 +1,69 @@
-import { ButtonHTMLAttributes, ReactNode } from "react";
+"use client";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cn } from "@/lib/utils";
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  asChild?: boolean;
+  variant?: "primary" | "secondary" | "ghost" | "icon";
+  size?: "default" | "sm" | "lg";
   loading?: boolean;
-  label?: string;
-  variant?: "primary" | "secondary" | "danger" | "outline" | "default";
-  children?: ReactNode;
 }
 
-export const Button = ({
-  type = "button",
-  loading,
-  label,
-  variant = "primary",
-  children,
-  ...props
-}: ButtonProps) => {
-  const baseClasses =
-    "px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 inline-flex items-center justify-center";
-  let variantClasses = "";
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      className,
+      variant = "primary",
+      size = "default",
+      asChild = false,
+      loading = false,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const Comp = asChild ? Slot : "button";
 
-  switch (variant) {
-    case "primary":
-      variantClasses =
-        "bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-300";
-      break;
-    case "secondary":
-      variantClasses =
-        "bg-gray-500 text-white hover:bg-gray-600 focus:ring-gray-300";
-      break;
-    case "danger":
-      variantClasses =
-        "bg-red-500 text-white hover:bg-red-600 focus:ring-red-300";
-      break;
-    case "outline":
-      variantClasses =
-        "bg-white border border-gray-300 text-gray-800 hover:bg-gray-50 focus:ring-gray-300";
-      break;
-    case "default":
-    default:
-      variantClasses = "bg-white text-gray-800 hover:bg-gray-50";
-      break;
+    return (
+      <Comp
+        ref={ref}
+        className={cn(
+          // Base styles
+          "inline-flex items-center justify-center font-medium transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl",
+
+          // Variants
+          variant === "primary" &&
+            "bg-primary text-primary-foreground hover:bg-accent",
+
+          variant === "secondary" &&
+            "bg-secondary text-secondary-foreground border border-border hover:bg-muted",
+
+          variant === "ghost" &&
+            "hover:bg-muted text-foreground",
+
+          variant === "icon" &&
+            "p-2 rounded-xl hover:bg-muted text-foreground",
+
+          // Sizes
+          size === "default" && "px-5 py-2.5 text-sm",
+          size === "sm" && "px-3 py-1.5 text-sm",
+          size === "lg" && "px-6 py-3 text-base",
+
+          className
+        )}
+        {...props}
+      >
+        {loading ? (
+          <span className="w-4 h-4 border-2 rounded-full animate-spin border-t-transparent border-foreground"></span>
+        ) : (
+          children
+        )}
+      </Comp>
+    );
   }
+);
 
-  return (
-    <button
-      {...props}
-      className={`${baseClasses} ${variantClasses} ${props.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-      disabled={loading || props.disabled}
-      type={type}
-    >
-      {loading ? "Loading..." : (children ?? label)}
-    </button>
-  );
-};
+Button.displayName = "Button";
