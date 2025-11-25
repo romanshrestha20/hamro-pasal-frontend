@@ -50,6 +50,7 @@ export default function ProfilePage() {
       </div>
     );
   }
+  console.log("user.createdAt raw:", user.createdAt, typeof user.createdAt);
 
   /* ================================================================
      Authenticated User
@@ -98,7 +99,12 @@ export default function ProfilePage() {
               <div>
                 <span className="text-muted-foreground">Member Since:</span>
                 <span className="ml-2 font-medium text-foreground">
-                  {new Date(user.createdAt).toLocaleDateString()}
+                  {user.createdAt &&
+                    new Date(user.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
                 </span>
               </div>
 
