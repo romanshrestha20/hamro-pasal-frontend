@@ -128,9 +128,9 @@ export const RegisterForm = () => {
       </Button>
 
       <div className="relative flex items-center justify-center my-4">
-        <div className="flex-grow mx-2 border-t border-border" />
+        <div className="mx-2 border-t grow border-border" />
         <span className="text-sm text-muted-foreground">or</span>
-        <div className="flex-grow mx-2 border-t border-border" />
+        <div className="mx-2 border-t grow border-border" />
       </div>
 
       <GoogleSignButton />
