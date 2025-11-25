@@ -4,12 +4,13 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
   variant?: "primary" | "secondary" | "ghost" | "icon";
   size?: "default" | "sm" | "lg";
   loading?: boolean;
+  iconLeft?: React.ReactNode;
+  iconRight?: React.ReactNode;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -20,32 +21,36 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size = "default",
       asChild = false,
       loading = false,
+      iconLeft,
+      iconRight,
       children,
+      disabled,
       ...props
     },
     ref
   ) => {
     const Comp = asChild ? Slot : "button";
+    const isDisabled = disabled || loading;
 
     return (
       <Comp
         ref={ref}
+        disabled={isDisabled}
         className={cn(
-          // Base styles
-          "inline-flex items-center justify-center font-medium transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl",
+          // Base
+          "inline-flex items-center justify-center font-medium rounded-xl transition-all active:scale-[0.97]",
+          "disabled:opacity-60 disabled:cursor-not-allowed select-none",
 
           // Variants
           variant === "primary" &&
-            "bg-primary text-primary-foreground hover:bg-accent",
+            "bg-primary text-primary-foreground hover:bg-primary/90",
 
           variant === "secondary" &&
-            "bg-secondary text-secondary-foreground border border-border hover:bg-muted",
+            "bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80",
 
-          variant === "ghost" &&
-            "hover:bg-muted text-foreground",
+          variant === "ghost" && "text-foreground hover:bg-muted",
 
-          variant === "icon" &&
-            "p-2 rounded-xl hover:bg-muted text-foreground",
+          variant === "icon" && "p-2 rounded-xl hover:bg-muted text-foreground",
 
           // Sizes
           size === "default" && "px-5 py-2.5 text-sm",
@@ -57,9 +62,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {loading ? (
-          <span className="w-4 h-4 border-2 rounded-full animate-spin border-t-transparent border-foreground"></span>
+          <span className="w-4 h-4 border-2 rounded-full border-primary-foreground border-t-transparent animate-spin" />
         ) : (
-          children
+          <>
+            {iconLeft && <span className="mr-2">{iconLeft}</span>}
+            {children}
+            {iconRight && <span className="ml-2">{iconRight}</span>}
+          </>
         )}
       </Comp>
     );
