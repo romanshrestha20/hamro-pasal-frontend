@@ -11,7 +11,7 @@ interface HomeCarouselProps {
 
 export default function HomeCarousel({ products }: HomeCarouselProps) {
   return (
-    <Carousel>
+    <Carousel maxItems={5}>
       {products.map((product) => {
         const imageUrl =
           product.image ||
