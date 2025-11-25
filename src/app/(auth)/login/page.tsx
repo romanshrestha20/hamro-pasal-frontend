@@ -1,4 +1,5 @@
 "use client";
+
 import { LoginForm } from "@/components/auth";
 import { AuthCard } from "@/components/auth/AuthCard";
 import Link from "next/link";
@@ -9,11 +10,11 @@ export default function LoginPage() {
       title="Welcome Back 👋"
       subtitle="Sign in to your account"
       footer={
-        <p className="text-center text-sm text-gray-500">
+        <p className="text-sm text-center text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link
             href="/register"
-            className="text-blue-600 font-medium hover:text-blue-700"
+            className="font-medium transition text-primary hover:opacity-80"
           >
             Sign up
           </Link>

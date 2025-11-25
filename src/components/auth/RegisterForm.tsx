@@ -20,7 +20,7 @@ export const RegisterForm = () => {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setValidationError(null); // Clear validation error on input change
+    setValidationError(null);
   };
 
   const validateForm = (): boolean => {
@@ -123,19 +123,14 @@ export const RegisterForm = () => {
 
       <FormError message={displayError ?? undefined} />
 
-      <Button
-        label="Create Account"
-        type="submit"
-        onClick={handleSubmit}
-        disabled={loading}
-      >
+      <Button type="submit" onClick={handleSubmit} disabled={loading}>
         {loading ? "Creating Account..." : "Create Account"}
       </Button>
 
-      <div className="flex items-center justify-center mt-4">
-        <div className="border-t border-gray-300 grow mx-2" />
-        <span className="text-sm text-gray-500">or</span>
-        <div className="border-t border-gray-300 grow mx-2" />
+      <div className="relative flex items-center justify-center my-4">
+        <div className="flex-grow mx-2 border-t border-border" />
+        <span className="text-sm text-muted-foreground">or</span>
+        <div className="flex-grow mx-2 border-t border-border" />
       </div>
 
       <GoogleSignButton />

@@ -1,4 +1,5 @@
 "use client";
+
 import { ReactNode } from "react";
 import { motion } from "framer-motion";
 
@@ -18,27 +19,34 @@ export function AuthCard({
   className = "",
 }: AuthCardProps) {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-500 px-4">
+    <div className="flex items-center justify-center min-h-screen px-4 transition-colors bg-background">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className={`bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-800 ${className}`}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className={`
+          bg-card text-card-foreground
+          p-8 rounded-2xl shadow-lg
+          w-full max-w-md
+          border border-border
+          backdrop-blur-sm
+          ${className}
+        `}
       >
-        <div className="mb-6">
-          <h2 className="text-3xl font-semibold text-center text-gray-800 dark:text-gray-100">
-            {title}
-          </h2>
+        {/* Header */}
+        <div className="mb-6 text-center">
+          <h2 className="text-3xl font-semibold">{title}</h2>
+
           {subtitle && (
-            <p className="text-center text-gray-500 dark:text-gray-400 mt-2 text-sm">
-              {subtitle}
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
           )}
         </div>
 
+        {/* Form Content */}
         {children}
 
-        {footer && <div className="mt-5">{footer}</div>}
+        {/* Footer Slot */}
+        {footer && <div className="mt-6">{footer}</div>}
       </motion.div>
     </div>
   );

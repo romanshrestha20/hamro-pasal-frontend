@@ -14,11 +14,12 @@ export const LoginForm = () => {
     email: "",
     password: "",
   });
+
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setValidationError(null); // Clear validation error on input change
+    setValidationError(null);
   };
 
   const validateForm = (): boolean => {
@@ -38,9 +39,7 @@ export const LoginForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
-
     await login(formData);
   };
 
@@ -58,6 +57,7 @@ export const LoginForm = () => {
         required
         autoComplete="email"
       />
+
       <Input
         label="Password"
         name="password"
@@ -69,29 +69,30 @@ export const LoginForm = () => {
         autoComplete="current-password"
       />
 
+      {/* Remember me + forgot password */}
       <div className="flex items-center justify-between text-sm">
-        <div className="flex items-center">
+        <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
             id="remember"
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
           />
-          <label htmlFor="remember" className="ml-2 text-gray-600">
-            Remember me
-          </label>
-        </div>
+          <span className="text-muted-foreground">Remember me</span>
+        </label>
+
         <Link
           href="/forgot-password"
-          className="text-blue-600 hover:text-blue-700"
+          className="transition text-primary hover:opacity-80"
         >
           Forgot password?
         </Link>
       </div>
 
+      {/* Error Message */}
       <FormError message={displayError ?? undefined} />
 
+      {/* Submit Button */}
       <Button
-        label="Sign In"
         type="submit"
         onClick={handleSubmit}
         disabled={loading}
@@ -99,12 +100,14 @@ export const LoginForm = () => {
         {loading ? "Signing in..." : "Sign In"}
       </Button>
 
-      <div className="flex items-center justify-center mt-4">
-        <div className="border-t border-gray-300 grow mx-2" />
-        <span className="text-sm text-gray-500">or</span>
-        <div className="border-t border-gray-300 grow mx-2" />
+      {/* Divider */}
+      <div className="relative flex items-center justify-center my-4">
+        <div className="flex-grow border-t border-border" />
+        <span className="mx-3 text-sm text-muted-foreground">or</span>
+        <div className="flex-grow border-t border-border" />
       </div>
 
+      {/* Google sign in */}
       <GoogleSignButton />
     </AuthForm>
   );
