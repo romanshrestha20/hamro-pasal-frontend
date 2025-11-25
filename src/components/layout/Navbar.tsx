@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { NavbarSearch } from "./NavbarSearch";
-import { NavbarLink } from "./NavbarLink";
+import { NavbarLink } from "../ui/NavbarLink";
 import { UserMenu } from "./UserMenu";
-import { X, ChevronDown } from "lucide-react";
+import { X } from "lucide-react";
 import { useState } from "react";
 import CategoriesSidebar from "./CategoriesSidebar";
 import { useProductContext } from "@/context/ProductContext";
 import { ThemeToggle } from "../ui/ThemeToggle";
+import { CartIcon } from "../cart";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
@@ -61,7 +62,7 @@ export function Navbar() {
               )}
             </div>
 
-            <NavbarLink href="/cart" label="Cart" />
+            <CartIcon />
           </div>
 
           <ThemeToggle />
