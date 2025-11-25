@@ -19,7 +19,6 @@ export default function CartPage() {
       {/* Top Section */}
       <div className="px-3 py-6 mx-auto max-w-7xl sm:px-4 md:py-10">
         <div className="flex flex-col gap-8 lg:flex-row">
-          
           {/* Summary */}
           <aside className="order-2 w-full max-w-full lg:max-w-sm lg:order-1 lg:sticky lg:top-24 lg:self-start">
             <CartSummary />
@@ -58,7 +57,7 @@ export default function CartPage() {
       {/* Sticky Checkout (Mobile Only) */}
       {items.length > 0 && (
         <div
-          className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-between px-4 py-3 border-t shadow-lg  bg-card border-border lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-between px-4 py-3 border-t shadow-lg bg-card border-border lg:hidden"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >
           <div className="flex flex-col leading-tight">
@@ -70,7 +69,7 @@ export default function CartPage() {
 
           <Link
             href="/checkout"
-            className="px-5 py-2 text-sm font-semibold transition-colors rounded-md  bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95"
+            className="px-5 py-2 text-sm font-semibold transition-colors rounded-md bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95"
           >
             Checkout
           </Link>
