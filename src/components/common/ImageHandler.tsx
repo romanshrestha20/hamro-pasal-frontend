@@ -1,22 +1,22 @@
 import Image from "next/image";
 import React from "react";
 
- interface ImageHandlerProps {
-   src?: string | null;
-   alt: string;
-   width?: number;
-   height?: number;
-   fill?: boolean;
-   className?: string;
-   priority?: boolean;
-   fallbackIcon?: React.ReactNode;
-   fallbackText?: string;
- }
+interface ImageHandlerProps {
+  src?: string | null;
+  alt: string;
+  width?: number;
+  height?: number;
+  fill?: boolean;
+  className?: string;
+  priority?: boolean;
+  fallbackIcon?: React.ReactNode;
+  fallbackText?: string;
+}
 
 /**
- * ImageHandler Component
- * Validates image URLs and provides fallback UI for invalid/missing images
- * Works with Next.js Image component
+ * ImageHandler Component (Theme-Aware)
+ * Validates image URLs and provides fallback UI for missing images.
+ * Works with Next.js Image component.
  */
 export const ImageHandler: React.FC<ImageHandlerProps> = ({
   src,
@@ -41,9 +41,8 @@ export const ImageHandler: React.FC<ImageHandlerProps> = ({
 
   const validSrc = isValidImageUrl(src) ? src : null;
 
-  // If we have a valid image, render Next.js Image
+  // If valid image: render Next.js <Image />
   if (validSrc) {
-    // For local backend images, use unoptimized to avoid Next.js image optimization issues
     const isLocalBackend =
       validSrc.includes("localhost:4000") ||
       validSrc.includes("127.0.0.1:4000");
@@ -62,19 +61,23 @@ export const ImageHandler: React.FC<ImageHandlerProps> = ({
     );
   }
 
-  // Fallback UI for invalid/missing images
-  const fallbackClassName = fill
-    ? `flex items-center justify-center bg-gray-200 ${className}`
-    : `flex items-center justify-center bg-gray-200 ${className}`;
+  /* -------------------------------------------------------------
+     FALLBACK UI (Theme-Aware)
+  ------------------------------------------------------------- */
 
-  const fallbackStyle =
+  const fallbackClass = `
+    flex items-center justify-center 
+    bg-muted text-muted-foreground 
+    border border-border
+    ${className}
+  `;
+
+  const fallbackFixedSize =
     !fill && width && height ? `w-[${width}px] h-[${height}px]` : "";
 
   return (
-    <div className={`${fallbackClassName} ${fallbackStyle}`.trim()}>
-      {fallbackIcon || (
-        <span className="text-sm text-gray-400">{fallbackText}</span>
-      )}
+    <div className={`${fallbackClass} ${fallbackFixedSize}`.trim()}>
+      {fallbackIcon || <span className="text-sm">{fallbackText}</span>}
     </div>
   );
 };

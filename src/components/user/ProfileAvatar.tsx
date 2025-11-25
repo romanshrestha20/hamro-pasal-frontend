@@ -27,11 +27,16 @@ const ProfileAvatar = ({
 }: ProfileAvatarProps) => {
   const sizeClass = sizeClasses[size];
   const initial =
-    alt?.[0]?.toUpperCase() || user?.firstName?.[0]?.toUpperCase() || "?";
+    alt?.[0]?.toUpperCase() ||
+    user?.firstName?.[0]?.toUpperCase() ||
+    "?";
 
   return (
     <div
-      className={`relative ${sizeClass} rounded-full overflow-hidden bg-gray-200`}
+      className={`
+        relative ${sizeClass} rounded-full overflow-hidden 
+        bg-muted text-muted-foreground
+      `}
     >
       {src ? (
         <ImageHandler
@@ -42,14 +47,14 @@ const ProfileAvatar = ({
           fallbackText={fallbackText || "No Image Available"}
         />
       ) : (
-        <div className="flex items-center justify-center w-full h-full font-semibold text-gray-500">
+        <div className="flex items-center justify-center w-full h-full font-semibold">
           {initial}
         </div>
       )}
 
       {/* Loading Overlay */}
       {uploading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <span className="text-xs font-medium text-white">Uploading...</span>
         </div>
       )}
