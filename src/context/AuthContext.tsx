@@ -12,6 +12,9 @@ import {
   loginUser,
   logoutUser,
   registerUser,
+  forgotPassword as forgotPasswordApi,
+  verifyOtp as verifyOtpApi,
+  resetPassword as resetPasswordApi,
 } from "@/lib/api/auth/index";
 import { setAuthToken } from "@/lib/api/api";
 import { updateUser as apiUpdateUser } from "@/lib/api/auth/index";
@@ -22,6 +25,8 @@ import toast from "react-hot-toast";
 import { CredentialResponse } from "@react-oauth/google";
 import { handleGoogleAuth } from "@/lib/api/auth/googleAuthHandler";
 
+import { handleApiError } from "@/lib/api/error";
+
 // Typed result for auth actions
 export type AuthResult =
   | { success: true; user: User }
@@ -29,7 +34,14 @@ export type AuthResult =
 
 // Options for auth actions
 export interface AuthActionOptions {
-  onSuccess?: (user: User) => void;
+  onSuccess?: (user?: User) => void;
+  onRedirect?: (path: string) => void;
+  onFailure?: (message: string) => void;
+}
+
+export interface OtpVerifyOptions {
+  onSuccess?: (resetToken: string) => void;
+  onRedirect?: (path: string) => void;
   onFailure?: (message: string) => void;
 }
 
@@ -58,6 +70,20 @@ interface AuthContextType {
     updatedData: UserUpdatePayload,
     options?: AuthActionOptions
   ) => Promise<AuthResult>;
+  forgotPassword: (
+    email: string,
+    options?: AuthActionOptions
+  ) => Promise<AuthResult>;
+  verifyOtp: (
+    email: string,
+    otp: string,
+    options?: OtpVerifyOptions
+  ) => Promise<AuthResult>;
+  resetPassword: (
+    token: string,
+    newPassword: string,
+    options?: AuthActionOptions
+  ) => Promise<AuthResult>;
 }
 
 // Create the AuthContext with default values
@@ -84,7 +110,28 @@ export const AuthContext = createContext<AuthContextType>({
     success: false,
     error: "Auth provider not initialized",
   }),
+  forgotPassword: async () => ({
+    success: false,
+    error: "Auth provider not initialized",
+  }),
+  verifyOtp: async () => ({
+    success: false,
+    error: "Auth provider not initialized",
+  }),
+  resetPassword: async () => ({
+    success: false,
+    error: "Auth provider not initialized",
+  }),
 });
+
+// Helper function to save auth token to localStorage and set in API client
+const saveAuthToken = (token?: string) => {
+  if (!token) return;
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem("hp_auth_token", token);
+  }
+  setAuthToken(token);
+};
 
 // AuthProvider component to wrap the app and provide auth state/actions
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -109,7 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (err) {
       console.error("Error fetching current user:", err);
-      setError(err instanceof Error ? err.message : "Failed to fetch user");
+      handleApiError(err);
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -129,7 +176,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const token = window.localStorage.getItem("hp_auth_token");
             if (token) setAuthToken(token);
           }
-        } catch {}
+        } catch (err) {
+          console.error("Error setting auth token:", err);
+          handleApiError(err);
+        }
         await refreshUser();
       }
     })();
@@ -153,14 +203,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (response.success && response.data?.user) {
         const user = response.data.user;
         const token = (response.data as any).token as string | undefined;
-        if (token) {
-          try {
-            if (typeof window !== "undefined") {
-              window.localStorage.setItem("hp_auth_token", token);
-            }
-          } catch {}
-          setAuthToken(token);
-        }
+        saveAuthToken(token);
+        toast.success("Logged in successfully!");
         await refreshUser(); //  update global auth state
         router.push("/products");
         options?.onSuccess?.(user);
@@ -168,19 +212,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         const message = response.error || "Invalid credentials";
         setError(message);
-        toast.error(message);
+
         options?.onFailure?.(message);
         return { success: false, error: message };
       }
     } catch (err) {
-      console.error("Login error:", err);
-      setError("Something went wrong. Please try again.");
-      toast.error("Something went wrong. Please try again.");
-      options?.onFailure?.("Something went wrong. Please try again.");
-      return {
-        success: false,
-        error: "Something went wrong. Please try again.",
-      };
+      const handled = handleApiError(err);
+      setError(handled.message);
+      options?.onFailure?.(handled.message);
+      return { success: false, error: handled.message };
     } finally {
       setLoading(false);
     }
@@ -199,14 +239,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (response.success && response.data?.user) {
         const user = response.data.user;
         const token = (response.data as any).token as string | undefined;
-        if (token) {
-          try {
-            if (typeof window !== "undefined") {
-              window.localStorage.setItem("hp_auth_token", token);
-            }
-          } catch {}
-          setAuthToken(token);
-        }
+        saveAuthToken(token);
         toast.success("Account created successfully!");
         await refreshUser(); // log in immediately
         router.push("/products");
@@ -215,18 +248,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         const message = response.error || "Registration failed";
         setError(message);
-        toast.error(message);
+
         options?.onFailure?.(message);
         return { success: false, error: message };
       }
     } catch (err) {
-      console.error("Registration error:", err);
-      setError("Something went wrong. Please try again.");
-      toast.error("Something went wrong. Please try again.");
-      options?.onFailure?.("Something went wrong. Please try again.");
+      const handled = handleApiError(err);
+      setError(handled.message);
+      options?.onFailure?.(handled.message);
       return {
         success: false,
-        error: "Something went wrong. Please try again.",
+        error: handled.message,
       };
     } finally {
       setLoading(false);
@@ -256,23 +288,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         const message = response.error || "Update failed";
         setError(message);
-        toast.error(message);
+
         options?.onFailure?.(message);
         return { success: false, error: message };
       }
     } catch (err) {
-      console.error("Update error:", err);
+      const handled = handleApiError(err);
       setUser(prev);
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again.";
-      setError(message);
-      toast.error(message);
-      options?.onFailure?.(message);
+      setError(handled.message);
+      options?.onFailure?.(handled.message);
       return {
         success: false,
-        error: message,
+        error: handled.message,
       };
     } finally {
       setLoading(false);
@@ -295,8 +322,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       toast.success("Logged out successfully!");
       router.push("/login");
     } catch (err) {
-      console.error("Error during logout:", err);
-      toast.error("Logout failed");
+      const handled = handleApiError(err);
+      setError(handled.message);
     } finally {
       setLoading(false);
     }
@@ -329,34 +356,136 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (result?.success && result.user) {
         const token = (result as any).token as string | undefined;
-        if (token) {
-          try {
-            if (typeof window !== "undefined") {
-              window.localStorage.setItem("hp_auth_token", token);
-            }
-          } catch {}
-          setAuthToken(token);
-        }
+        saveAuthToken(token);
+        toast.success("Logged in successfully!");
         await refreshUser();
         router.push("/products");
         return { success: true, user: result.user };
       } else {
         const message = "Google login failed";
         setError(message);
-        toast.error(message);
+
         return { success: false, error: message };
       }
-    } catch {
-      const message = "Something went wrong during Google login";
-      setError(message);
-      toast.error(message);
-      options?.onFailure?.(message);
-      return { success: false, error: message };
+    } catch (err) {
+      const handled = handleApiError(err);
+      setError(handled.message);
+
+      return { success: false, error: handled.message };
     } finally {
       setLoading(false);
     }
   };
 
+  const forgotPassword = async (
+    email: string,
+    options?: AuthActionOptions
+  ): Promise<AuthResult> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await forgotPasswordApi({ email });
+
+      if (response.success && response.data) {
+        const message = response.data.message;
+        toast.success(message);
+        options?.onSuccess?.();
+        return { success: true, user: null as any };
+      } else {
+        const message = response.error || "Forgot password request failed";
+        setError(message);
+
+        options?.onFailure?.(message);
+        return { success: false, error: message };
+      }
+    } catch (err) {
+      const handled = handleApiError(err);
+      setError(handled.message);
+
+      options?.onFailure?.(handled.message);
+      return {
+        success: false,
+        error: handled.message,
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOtp = async (
+    email: string,
+    otp: string,
+    options?: OtpVerifyOptions
+  ): Promise<AuthResult> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await verifyOtpApi({ email, otp });
+
+      if (response.success) {
+        // response.data.resetToken now properly typed
+        const { message, resetToken } = response.data!;
+
+        toast.success(message);
+        options?.onSuccess?.(resetToken);
+
+        return { success: true, user: undefined as any };
+      } else {
+        const message = response.error || "OTP verification failed";
+        setError(message);
+        options?.onFailure?.(message);
+
+        return { success: false, error: message };
+      }
+    } catch (err) {
+      const handled = handleApiError(err);
+      setError(handled.message);
+
+      options?.onFailure?.(handled.message);
+      return { success: false, error: handled.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (
+    token: string,
+    newPassword: string,
+    options?: AuthActionOptions
+  ): Promise<AuthResult> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await resetPasswordApi({
+        token,
+        newPassword,
+      });
+
+      if (response.success && response.data) {
+        const message = response.data.message;
+        toast.success(message);
+        options?.onSuccess?.();
+        return { success: true, user: null as any };
+      } else {
+        const message = response.error || "Reset password request failed";
+        setError(message);
+
+        options?.onFailure?.(message);
+        return { success: false, error: message };
+      }
+    } catch (err) {
+      const handled = handleApiError(err);
+      setError(handled.message);
+      options?.onFailure?.(handled.message);
+      return {
+        success: false,
+        error: handled.message,
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <AuthContext.Provider
       value={{
@@ -370,6 +499,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         googleAuth,
         refreshUser,
         updateUser,
+        forgotPassword,
+        verifyOtp,
+        resetPassword,
       }}
     >
       {children}

@@ -22,6 +22,12 @@ export interface ForgotPasswordPayload {
     email: string;
 }
 
+export interface VerifyOtpPayload {
+    email: string;
+    otp: string;
+    resetToken?: string;
+}
+
 export interface ResetPasswordPayload {
     token: string;
     newPassword: string;
@@ -51,6 +57,15 @@ export const getCurrentUser = () =>
 export const forgotPassword = (payload: ForgotPasswordPayload) =>
     apiRequest<{ message: string }>("post", "/auth/forgot-password", payload);
 
+export const verifyOtp = (payload: { email: string; otp: string }) =>
+    apiRequest<{
+        success: boolean;
+        message: string;
+        resetToken: string;
+    }>("post", "/auth/verify-otp", payload);
+
 export const resetPassword = (payload: ResetPasswordPayload) =>
     apiRequest<{ message: string }>("post", "/auth/reset-password", payload);
+
+
 
