@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import { useProfileImage } from "@/hooks/userProfileImage";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui";
+import { ChangePasswordDialog } from "../auth/ChangePasswordDialog";
 
 interface UserProfileProps {
   user: User;
@@ -143,6 +144,8 @@ const UserProfile = ({
               {/* Edit / Logout Buttons */}
               {editable && (
                 <div className="flex gap-4 pt-6 mt-8 border-t border-border">
+                  <ChangePasswordDialog />
+
                   <Button onClick={() => setIsEditing(true)}>Edit</Button>
 
                   <Button onClick={() => router.push("/logout")}>

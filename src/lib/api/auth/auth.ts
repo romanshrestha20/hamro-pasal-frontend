@@ -33,6 +33,11 @@ export interface ResetPasswordPayload {
     newPassword: string;
 }
 
+export interface ChangePasswordPayload {
+    oldPassword: string;
+    newPassword: string;
+}
+
 export const googleAuth = (payload: GoogleAuthPayload) =>
     apiRequest<{ token: string; user: User }>("post", "/auth/google", payload)
         .then((response) => {
@@ -69,3 +74,6 @@ export const resetPassword = (payload: ResetPasswordPayload) =>
 
 
 
+
+export const changePassword = (payload: ChangePasswordPayload) =>
+    apiRequest<{ message: string }>("put", "/auth/change-password", payload);

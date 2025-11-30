@@ -15,6 +15,7 @@ import {
   forgotPassword as forgotPasswordApi,
   verifyOtp as verifyOtpApi,
   resetPassword as resetPasswordApi,
+  changePassword as changePasswordApi,
 } from "@/lib/api/auth/index";
 import { setAuthToken } from "@/lib/api/api";
 import { updateUser as apiUpdateUser } from "@/lib/api/auth/index";
@@ -84,6 +85,11 @@ interface AuthContextType {
     newPassword: string,
     options?: AuthActionOptions
   ) => Promise<AuthResult>;
+  changePassword: (
+    oldPassword: string,
+    newPassword: string,
+    options?: AuthActionOptions
+  ) => Promise<AuthResult>;
 }
 
 // Create the AuthContext with default values
@@ -119,6 +125,10 @@ export const AuthContext = createContext<AuthContextType>({
     error: "Auth provider not initialized",
   }),
   resetPassword: async () => ({
+    success: false,
+    error: "Auth provider not initialized",
+  }),
+  changePassword: async () => ({
     success: false,
     error: "Auth provider not initialized",
   }),
@@ -486,6 +496,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
+
+  const changePassword = async (
+    oldPassword: string,
+    newPassword: string,
+    options?: AuthActionOptions
+  ): Promise<AuthResult> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await changePasswordApi({
+        oldPassword,
+        newPassword,
+      });
+
+      if (response.success && response.data) {
+        const message = response.data.message;
+        toast.success(message);
+        options?.onSuccess?.();
+        return { success: true, user: null as any };
+      } else {
+        const message = response.error || "Change password request failed";
+        setError(message);
+
+        options?.onFailure?.(message);
+        return { success: false, error: message };
+      }
+    } catch (err) {
+      const handled = handleApiError(err);
+      setError(handled.message);
+      options?.onFailure?.(handled.message);
+      return {
+        success: false,
+        error: handled.message,
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -502,6 +551,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         forgotPassword,
         verifyOtp,
         resetPassword,
+        changePassword,
       }}
     >
       {children}
