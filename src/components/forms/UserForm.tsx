@@ -64,6 +64,9 @@ export default function UserForm({
     }
   };
 
+  if (loading) {
+    return <LoadingState />;
+  }
   return (
     <form
       onSubmit={handleSubmit}
