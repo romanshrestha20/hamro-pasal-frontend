@@ -13,6 +13,7 @@ import { Toaster } from "react-hot-toast";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
 import { Footer as SiteFooter } from "@/components/layout/Footer";
 import MobileCartBar from "@/components/cart/MobileCartBar";
+import { OrderProvider } from "@/context/OrderContext";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -48,19 +49,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
 
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+        <GoogleOAuthProvider
+          clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}
+        >
           <AuthProvider>
             <ProductProvider>
               <CartProvider>
-                <FavoriteProvider>
-                  <Toaster position="top-center" />
-                  <NavbarWrapper />
-                  <ReviewProvider>
-                    <main className="min-h-screen pb-16">{children}</main>
-                    <MobileCartBar />
-                  </ReviewProvider>
-                  <SiteFooter />
-                </FavoriteProvider>
+                <OrderProvider>
+                  <FavoriteProvider>
+                    <Toaster position="top-center" />
+                    <NavbarWrapper />
+                    <ReviewProvider>
+                      <main className="min-h-screen pb-16">{children}</main>
+                      <MobileCartBar />
+                    </ReviewProvider>
+                    <SiteFooter />
+                  </FavoriteProvider>
+                </OrderProvider>
               </CartProvider>
             </ProductProvider>
           </AuthProvider>
