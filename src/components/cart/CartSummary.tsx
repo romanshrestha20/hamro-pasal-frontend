@@ -6,8 +6,10 @@ import Header from "../ui/Header";
 import { Button } from "../ui";
 import toast from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 export default function CartSummary() {
+  const router = useRouter();
   const { totalItems, subtotal, loading } = useCart();
   const { isAuthenticated } = useAuth();
   const [promo, setPromo] = useState("");
@@ -16,7 +18,20 @@ export default function CartSummary() {
   const total = Math.max(0, subtotal - discount);
 
   const formatCurrency = (v: number) => v.toFixed(2);
+ const handleCheckout = () => {
+   if (!isAuthenticated) {
+     // redirect user to login page, then back to checkout
+     router.push("/login?redirect=/checkout");
+     return;
+   }
 
+   if (totalItems === 0) {
+     toast.error("Your cart is empty.");
+     return;
+   }
+
+   router.push("/checkout");
+ };
   return (
     <aside className="w-full p-6 transition-colors border rounded-lg shadow-lg border-border bg-card text-card-foreground">
       <Header title="Order Summary" />
@@ -52,13 +67,15 @@ export default function CartSummary() {
 
         {/* Promo Input */}
         <div className="mt-4">
-          <label className="block text-xs text-muted-foreground">Promo code</label>
+          <label className="block text-xs text-muted-foreground">
+            Promo code
+          </label>
           <div className="flex gap-2 mt-2">
             <input
               value={promo}
               onChange={(e) => setPromo(e.target.value)}
               placeholder="Enter code"
-              className="flex-1 px-3 py-2 transition-colors border rounded-md  bg-background text-foreground border-input focus:outline-none focus:ring-2 focus:ring-primary/40 placeholder:text-muted-foreground"
+              className="flex-1 px-3 py-2 transition-colors border rounded-md bg-background text-foreground border-input focus:outline-none focus:ring-2 focus:ring-primary/40 placeholder:text-muted-foreground"
             />
             <Button
               onClick={() => {}}
@@ -71,7 +88,7 @@ export default function CartSummary() {
 
         {/* Checkout Button */}
         <div className="flex flex-col gap-3 mt-4">
-          <button
+          <Button
             className="
               w-full py-3 rounded-xl font-medium shadow-sm
               bg-primary text-primary-foreground hover:bg-primary/90
@@ -79,13 +96,7 @@ export default function CartSummary() {
               disabled:opacity-60 disabled:cursor-not-allowed
             "
             disabled={loading || totalItems === 0}
-            onClick={() => {
-              toast.error(
-                isAuthenticated
-                  ? "Checkout functionality not implemented yet."
-                  : "Please log in to proceed to checkout."
-              );
-            }}
+            onClick={handleCheckout}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -95,7 +106,7 @@ export default function CartSummary() {
             ) : (
               "Proceed to Checkout"
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </aside>

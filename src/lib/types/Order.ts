@@ -43,6 +43,7 @@ export interface Payment {
 }
 
 export interface Order {
+    productImage: any;
     id: string;
     userId: string;
 
