@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import toast from "react-hot-toast";
 import LoadingState from "../common/LoadingState";
+import { Form } from "../ui";
 
 interface UserFormProps {
   firstName?: string;
@@ -68,7 +69,7 @@ export default function UserForm({
     return <LoadingState />;
   }
   return (
-    <form
+    <Form
       onSubmit={handleSubmit}
       className="p-6 space-y-4 border shadow-sm bg-card text-card-foreground border-border rounded-xl"
     >
@@ -119,6 +120,6 @@ export default function UserForm({
       >
         Cancel
       </Button>
-    </form>
+    </Form>
   );
 }

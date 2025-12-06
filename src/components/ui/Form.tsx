@@ -2,14 +2,14 @@
 
 import { ReactNode } from "react";
 
-interface FormProps {
+interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
   children: ReactNode;
-  className?: string;
 }
 
-export const Form = ({ children, className = "" }: FormProps) => {
+export const Form = ({ children, className = "", onSubmit }: FormProps) => {
   return (
     <form
+      onSubmit={onSubmit}
       className={`
         flex flex-col gap-4
         w-full
