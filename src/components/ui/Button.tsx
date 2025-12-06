@@ -29,36 +29,47 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const Comp = asChild ? Slot : "button";
     const isDisabled = disabled || loading;
 
+    const buttonClasses = cn(
+      // Base
+      "inline-flex items-center justify-center font-medium rounded-xl transition-all active:scale-[0.97]",
+      "disabled:opacity-60 disabled:cursor-not-allowed select-none",
+
+      // Variants
+      variant === "primary" &&
+        "bg-primary text-primary-foreground hover:bg-primary/90",
+
+      variant === "secondary" &&
+        "bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80",
+
+      variant === "ghost" && "text-foreground hover:bg-muted",
+
+      variant === "icon" && "p-2 rounded-xl hover:bg-muted text-foreground",
+
+      // Sizes
+      size === "default" && "px-5 py-2.5 text-sm",
+      size === "sm" && "px-3 py-1.5 text-sm",
+      size === "lg" && "px-6 py-3 text-base",
+
+      className
+    );
+
+    // When asChild, render single child with Slot
+    if (asChild) {
+      return (
+        <Slot ref={ref} className={buttonClasses} {...props}>
+          {children}
+        </Slot>
+      );
+    }
+
+    // Regular button
     return (
-      <Comp
+      <button
         ref={ref}
         disabled={isDisabled}
-        className={cn(
-          // Base
-          "inline-flex items-center justify-center font-medium rounded-xl transition-all active:scale-[0.97]",
-          "disabled:opacity-60 disabled:cursor-not-allowed select-none",
-
-          // Variants
-          variant === "primary" &&
-            "bg-primary text-primary-foreground hover:bg-primary/90",
-
-          variant === "secondary" &&
-            "bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80",
-
-          variant === "ghost" && "text-foreground hover:bg-muted",
-
-          variant === "icon" && "p-2 rounded-xl hover:bg-muted text-foreground",
-
-          // Sizes
-          size === "default" && "px-5 py-2.5 text-sm",
-          size === "sm" && "px-3 py-1.5 text-sm",
-          size === "lg" && "px-6 py-3 text-base",
-
-          className
-        )}
+        className={buttonClasses}
         {...props}
       >
         {loading ? (
@@ -70,7 +81,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             {iconRight && <span className="ml-2">{iconRight}</span>}
           </>
         )}
-      </Comp>
+      </button>
     );
   }
 );
