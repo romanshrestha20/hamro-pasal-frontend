@@ -19,3 +19,4 @@ export interface UserUpdatePayload {
   address?: string;
   profilePicture?: string;
 }
+
