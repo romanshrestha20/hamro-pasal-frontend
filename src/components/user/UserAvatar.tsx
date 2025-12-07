@@ -1,45 +1,15 @@
 "use client";
 
 import ProfileAvatar from "./ProfileAvatar";
+import type { User } from "@/lib/types";
 
-interface UserAvatarProps {
-  user?: {
-    firstName?: string;
-    name?: string;
-    profilePicture?: string | null;
-  };
-  size?: "sm" | "md" | "lg" | "xl";
-  showFallbackText?: boolean;
-  uploading?: boolean;
-}
-
-export default function UserAvatar({
+export const UserAvatar = ({
   user,
   size = "sm",
-  showFallbackText = true,
-  uploading = false,
-}: UserAvatarProps) {
-  if (!user) {
-    return (
-      <ProfileAvatar
-        alt="Guest"
-        fallbackText={showFallbackText ? "G" : ""}
-        size={size}
-        uploading={uploading}
-      />
-    );
-  }
-
-  const name = user.name || user.firstName || "User";
-  const imageSrc = user.profilePicture || null;
-
-  return (
-    <ProfileAvatar
-      uploading={uploading}
-      src={imageSrc}
-      alt={name}
-      fallbackText={showFallbackText ? name.charAt(0).toUpperCase() : ""}
-      size={size}
-    />
-  );
-}
+}: {
+  user?: Partial<User> | null;
+  size?: "sm" | "md" | "lg" | "xl";
+}) => {
+  const name = user?.firstName ?? "User";
+  return <ProfileAvatar src={user?.profilePicture} alt={name} size={size} />;
+};

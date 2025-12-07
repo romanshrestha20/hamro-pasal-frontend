@@ -6,7 +6,7 @@ import type { User } from "@/lib/types";
 import {
   ProfileAvatar,
   ProfileDetails,
-  ProfileImageUpload,
+  ProfileImageUploader,
 } from "@/components/user";
 import UserForm from "@/components/forms/UserForm";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,6 +44,25 @@ const UserProfile = ({
   const router = useRouter();
 
   /* ----------------------------------------------------
+     Image Upload Hook
+  ---------------------------------------------------- */
+  const {
+    previewImage,
+    uploading,
+    error,
+    handleFileSelected,
+    removeProfileImage,
+  } = useProfileImage({
+    onSuccess: (url) => onProfileUpdated?.(url),
+    onRemove: async () => {
+      await refreshUser();
+    },
+  });
+
+  const displayImageSrc = previewImage || user.profilePicture;
+  const displayName = `${user.firstName} ${user.lastName ?? ""}`.trim();
+
+  /* ----------------------------------------------------
      Save Profile
   ---------------------------------------------------- */
   const handleSubmit = async (formData: Partial<User>) => {
@@ -68,16 +87,9 @@ const UserProfile = ({
       toast.error("An error occurred", { id: toastId });
     }
   };
-
-  /* ----------------------------------------------------
-     Image Upload Hook
-  ---------------------------------------------------- */
-  const { previewImage, uploading, error, handleFileSelected } =
-    useProfileImage({ onSuccess: onProfileUpdated });
-
-  const displayImageSrc = previewImage || user.profilePicture;
-  const displayName = `${user.firstName} ${user.lastName ?? ""}`.trim();
-
+  const handleDeleteUserProfileImage = async () => {
+    await removeProfileImage();
+  };
   /* ----------------------------------------------------
      UI
   ---------------------------------------------------- */
@@ -89,7 +101,6 @@ const UserProfile = ({
         --------------------------------------- */}
         <div className="flex flex-col items-center gap-3 md:items-start">
           <ProfileAvatar
-            user={user}
             src={displayImageSrc}
             alt={displayName}
             size={avatarSize}
@@ -97,10 +108,11 @@ const UserProfile = ({
           />
 
           {editable && (
-            <ProfileImageUpload
+            <ProfileImageUploader
               uploading={uploading}
               error={error}
-              onFileSelect={handleFileSelected}
+              onSelect={handleFileSelected}
+              onRemove={handleDeleteUserProfileImage}
             />
           )}
 
