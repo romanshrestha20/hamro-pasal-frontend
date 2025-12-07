@@ -1,12 +1,14 @@
+"use client";
 
-
-import { useEffect, useState } from "react";
-import { imageUpload } from "@/lib/api/auth";
+import { useState } from "react";
+import { useImageContext } from "@/context/ImageProvider";
+import { useAuth } from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 
 interface UseProfileImageOptions {
     onSuccess?: (url: string) => void;
-    maxFileSize?: number; // in bytes
+    onRemove?: () => void;
+    maxFileSize?: number;
     allowedTypes?: string[];
 }
 
@@ -15,106 +17,96 @@ interface UseProfileImageReturn {
     uploading: boolean;
     error: string | null;
     handleFileSelected: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+    removeProfileImage: () => Promise<void>;
     resetError: () => void;
 }
 
-const DEFAULT_MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const DEFAULT_MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 const DEFAULT_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
-export const useProfileImage = (
-    options: UseProfileImageOptions = {}
-): UseProfileImageReturn => {
+export const useProfileImage = ({
+    onSuccess,
+    onRemove,
+    maxFileSize = DEFAULT_MAX_SIZE,
+    allowedTypes = DEFAULT_ALLOWED_TYPES,
+}: UseProfileImageOptions): UseProfileImageReturn => {
+
     const {
-        onSuccess,
-        maxFileSize = DEFAULT_MAX_SIZE,
-        allowedTypes = DEFAULT_ALLOWED_TYPES,
-    } = options;
+        uploading,
+        error,
+        uploadUserImage,
+        removeUserImage
+    } = useImageContext();
+
+    const { user } = useAuth();
 
     const [previewImage, setPreviewImage] = useState<string | null>(null);
-    const [uploading, setUploading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
-    // Cleanup blob URLs on unmount
-    useEffect(() => {
-        return () => {
-            if (previewImage?.startsWith("blob:")) {
-                URL.revokeObjectURL(previewImage);
-            }
-        };
-    }, [previewImage]);
-
-    const validateFile = (file: File): string | null => {
-        // Validate file size
-        if (file.size > maxFileSize) {
-            const sizeMB = (maxFileSize / (1024 * 1024)).toFixed(1);
-            return `File too large. Maximum size is ${sizeMB}MB.`;
-        }
-
-        // Validate file type
-        if (!allowedTypes.includes(file.type)) {
-            const types = allowedTypes.map((t) => t.split("/")[1].toUpperCase()).join(", ");
-            return `Invalid format. Please use ${types}.`;
-        }
-
-        return null;
+    const resetError = () => {
+        // future: clear internal errors if needed
     };
 
+    // -------------------------------
+    // HANDLE FILE SELECTION
+    // -------------------------------
     const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        setError(null);
-
-        // Validate file
-        const validationError = validateFile(file);
-        if (validationError) {
-            setError(validationError);
-            toast.error(validationError);
+    // Validate size
+        if (file.size > maxFileSize) {
+            toast.error("File is too large");
             return;
         }
 
-        // Show local preview immediately
-        const blobUrl = URL.createObjectURL(file);
-        setPreviewImage(blobUrl);
+        // Validate type
+        if (!allowedTypes.includes(file.type)) {
+            toast.error("Invalid file type");
+            return;
+        }
 
-        try {
-            setUploading(true);
-            const res = await imageUpload(file);
+        // Preview UI
+        const localPreview = URL.createObjectURL(file);
+        setPreviewImage(localPreview);
 
-            // If request failed (non-2xx), show error
-            if (!res.success) {
-                toast.error("Upload failed. Please try again.");
-                setError("Upload failed. Please try again.");
-                return;
-            }
+        // Upload to backend
+        const uploaded = await uploadUserImage(file);
 
-            // Backend returns an absolute URL at res.data.data.url
-            const absoluteUrl: string | undefined = res.data?.data?.url;
-            if (absoluteUrl) {
-                toast.success("Profile photo updated!");
-                setPreviewImage(absoluteUrl);
-                onSuccess?.(absoluteUrl);
-            } else {
-                setError("Upload succeeded, but no image URL was returned.");
-                toast.error("Upload succeeded, but no image URL was returned.");
-            }
-        } catch (err) {
-            const errorMessage = "Upload failed. Please try again.";
-            setError(errorMessage);
-            toast.error(errorMessage);
-            console.error("Image upload error:", err);
-        } finally {
-            setUploading(false);
+        if (!uploaded) {
+            toast.error("Image upload failed");
+            return;
+        }
+
+        // optional callback
+        if (onSuccess) {
+            const absoluteUrl = uploaded.url;
+            onSuccess(absoluteUrl);
         }
     };
 
-    const resetError = () => setError(null);
+    // -------------------------------
+    // REMOVE PROFILE IMAGE
+    // -------------------------------
+    const handleDeleteProfileImage = async () => {
+        if (!user?.id) {
+            toast.error("User not authenticated");
+            return;
+        }
+
+        const ok = await removeUserImage();
+
+        if (ok) {
+            setPreviewImage(null); // remove preview
+            onRemove?.();
+        }
+    };
 
     return {
         previewImage,
         uploading,
         error,
         handleFileSelected,
+        removeProfileImage: handleDeleteProfileImage,
         resetError,
     };
 };
