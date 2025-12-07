@@ -8,12 +8,12 @@ import { ProductProvider } from "@/context/ProductContext";
 import { FavoriteProvider } from "@/context/FavoriteContext";
 import { CartProvider } from "@/context/CartContext";
 import { ReviewProvider } from "@/context/ReviewContext";
-
+import { ImageProvider } from "@/context/ImageProvider";
+import { OrderProvider } from "@/context/OrderContext";
 import { Toaster } from "react-hot-toast";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
-import { Footer as SiteFooter } from "@/components/layout/Footer";
 import MobileCartBar from "@/components/cart/MobileCartBar";
-import { OrderProvider } from "@/context/OrderContext";
+import { Footer } from "@/components/layout/Footer";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -26,7 +26,11 @@ export const metadata: Metadata = {
   description: "Your one-stop shop for everything you need!",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -56,15 +60,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ProductProvider>
               <CartProvider>
                 <OrderProvider>
-                  <FavoriteProvider>
-                    <Toaster position="top-center" />
-                    <NavbarWrapper />
-                    <ReviewProvider>
-                      <main className="min-h-screen pb-16">{children}</main>
-                      <MobileCartBar />
-                    </ReviewProvider>
-                    <SiteFooter />
-                  </FavoriteProvider>
+                  <ImageProvider>
+                    <FavoriteProvider>
+                      <Toaster position="top-center" />
+                      <NavbarWrapper />
+                      <ReviewProvider>
+                        <main className="min-h-screen pb-16">{children}</main>
+                        <Footer />
+                        <MobileCartBar />
+                      </ReviewProvider>
+                    </FavoriteProvider>
+                  </ImageProvider>
                 </OrderProvider>
               </CartProvider>
             </ProductProvider>

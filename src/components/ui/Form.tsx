@@ -2,18 +2,18 @@
 
 import { ReactNode } from "react";
 
-interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
+interface FormProps {
   children: ReactNode;
+  className?: string;
+  onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
+  å;
 }
 
-export const Form = ({ children, className = "", onSubmit }: FormProps) => {
+export const Form = ({ children, className = "" }: FormProps) => {
   return (
     <form
-      onSubmit={onSubmit}
       className={`
-        flex flex-col gap-4
-        w-full
-        animate-fade-in
+        w-full space-y-4
         ${className}
       `}
     >

@@ -1,85 +1,55 @@
-import Image from "next/image";
-import React from "react";
+"use client";
 
-interface ImageHandlerProps {
+import Image from "next/image";
+
+export const ImageHandler = ({
+  src,
+  alt,
+  fill = false,
+  width,
+  height,
+  className = "",
+  fallbackText = "No Image",
+}: {
   src?: string | null;
   alt: string;
   width?: number;
   height?: number;
   fill?: boolean;
   className?: string;
-  priority?: boolean;
-  fallbackIcon?: React.ReactNode;
   fallbackText?: string;
-}
-
-/**
- * ImageHandler Component (Theme-Aware)
- * Validates image URLs and provides fallback UI for missing images.
- * Works with Next.js Image component.
- */
-export const ImageHandler: React.FC<ImageHandlerProps> = ({
-  src,
-  alt,
-  width,
-  height,
-  fill = false,
-  className = "",
-  priority = false,
-  fallbackIcon,
-  fallbackText = "No Image",
 }) => {
-  // Validate image URL - must be absolute URL or start with /
-  const isValidImageUrl = (url: string | null | undefined): url is string => {
-    if (!url || typeof url !== "string") return false;
+  const valid =
+    src &&
+    (src.startsWith("http") || src.startsWith("/") || src.startsWith("blob"));
+
+  if (!valid) {
     return (
-      url.startsWith("http://") ||
-      url.startsWith("https://") ||
-      url.startsWith("/")
-    );
-  };
-
-  const validSrc = isValidImageUrl(src) ? src : null;
-
-  // If valid image: render Next.js <Image />
-  if (validSrc) {
-    const isLocalBackend =
-      validSrc.includes("localhost:4000") ||
-      validSrc.includes("127.0.0.1:4000");
-
-    return (
-      <Image
-        src={validSrc}
-        alt={alt}
-        width={width}
-        height={height}
-        fill={fill}
-        className={className}
-        priority={priority}
-        unoptimized={isLocalBackend}
-      />
+      <div
+        className={`flex items-center justify-center bg-muted text-muted-foreground ${className}`}
+        style={{
+          width: fill ? "100%" : width,
+          height: fill ? "100%" : height,
+        }}
+      >
+        {fallbackText}
+      </div>
     );
   }
 
-  /* -------------------------------------------------------------
-     FALLBACK UI (Theme-Aware)
-  ------------------------------------------------------------- */
-
-  const fallbackClass = `
-    flex items-center justify-center 
-    bg-muted text-muted-foreground 
-    border border-border
-    ${className}
-  `;
-
-  const fallbackFixedSize =
-    !fill && width && height ? `w-[${width}px] h-[${height}px]` : "";
+  // Check if image is from localhost/127.0.0.1
+  const isLocalhost =
+    src && (src.includes("localhost:") || src.includes("127.0.0.1:"));
 
   return (
-    <div className={`${fallbackClass} ${fallbackFixedSize}`.trim()}>
-      {fallbackIcon || <span className="text-sm">{fallbackText}</span>}
-    </div>
+    <Image
+      src={src}
+      alt={alt}
+      fill={fill}
+      width={fill ? undefined : width}
+      height={fill ? undefined : height}
+      className={className}
+      unoptimized={isLocalhost}
+    />
   );
 };
-
-export default ImageHandler;
