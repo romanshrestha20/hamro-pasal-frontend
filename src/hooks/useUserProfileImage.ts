@@ -33,7 +33,7 @@ export const useUserProfileImage = ({
         const uploaded = await uploadUserImage(file);
         if (!uploaded) return toast.error("Image upload failed");
 
-        const url = uploaded.fullUrl ?? uploaded.url;
+        const url = uploaded.url;
         onSuccess?.(url);
         console.log("Uploaded profile image URL:", url);
     };
