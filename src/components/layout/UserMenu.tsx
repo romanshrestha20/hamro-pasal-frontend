@@ -10,7 +10,7 @@ import DropDown, {
 import { User } from "@/lib/types/User";
 
 export function UserMenu() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, logout } = useAuth();
 
   /** 👤 If NO user → Show Sign In button */
   if (!user) {

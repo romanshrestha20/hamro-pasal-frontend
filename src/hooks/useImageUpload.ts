@@ -1,5 +1,6 @@
 import toast from "react-hot-toast";
 
+// Hook for validating image uploads
 export const useImageUpload = (maxSize = 5 * 1024 * 1024) => {
   const validate = (file: File) => {
     if (file.size > maxSize) {

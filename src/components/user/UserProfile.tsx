@@ -8,6 +8,7 @@ import {
   ProfileDetails,
   ProfileImageUploader,
 } from "@/components/user";
+import ProfileImageDialog from "@/components/user/ProfileImageDialog";
 import UserForm from "@/components/forms/UserForm";
 import { useAuth } from "@/hooks/useAuth";
 import toast from "react-hot-toast";
@@ -15,6 +16,7 @@ import { useProfileImage } from "@/hooks/userProfileImage";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui";
 import { ChangePasswordDialog } from "../auth/ChangePasswordDialog";
+
 
 interface UserProfileProps {
   user: User;
@@ -39,7 +41,7 @@ const UserProfile = ({
   rightTitle,
   rightSubtitle,
 }: UserProfileProps) => {
-  const { updateUser, refreshUser } = useAuth();
+  const { updateUser, refreshUser, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
 
@@ -49,8 +51,7 @@ const UserProfile = ({
   const {
     previewImage,
     uploading,
-    error,
-    handleFileSelected,
+    uploadFile,
     removeProfileImage,
   } = useProfileImage({
     onSuccess: (url) => onProfileUpdated?.(url),
@@ -58,6 +59,7 @@ const UserProfile = ({
       await refreshUser();
     },
   });
+  const [openImageDialog, setOpenImageDialog] = useState(false);
 
   const displayImageSrc = previewImage || user.profilePicture;
   const displayName = `${user.firstName} ${user.lastName ?? ""}`.trim();
@@ -108,12 +110,9 @@ const UserProfile = ({
           />
 
           {editable && (
-            <ProfileImageUploader
-              uploading={uploading}
-              error={error}
-              onSelect={handleFileSelected}
-              onRemove={handleDeleteUserProfileImage}
-            />
+            <Button variant="outline" onClick={() => setOpenImageDialog(true)}>
+              Change Photo
+            </Button>
           )}
 
           {leftActions && <div className="w-full">{leftActions}</div>}
@@ -160,7 +159,11 @@ const UserProfile = ({
 
                   <Button onClick={() => setIsEditing(true)}>Edit</Button>
 
-                  <Button onClick={() => router.push("/logout")}>
+                  <Button
+                    onClick={() => logout()}
+                    variant="outline"
+                    className="text-error"
+                  >
                     Sign Out
                   </Button>
                 </div>
@@ -169,6 +172,16 @@ const UserProfile = ({
           )}
         </div>
       </div>
+
+      <ProfileImageDialog
+        open={openImageDialog}
+        onClose={() => setOpenImageDialog(false)}
+        onUpload={async (file) => {
+          await uploadFile(file);
+          await refreshUser();
+          setOpenImageDialog(false);
+        }}
+      />
     </div>
   );
 };

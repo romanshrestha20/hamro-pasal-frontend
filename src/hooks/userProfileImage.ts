@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useImageContext } from "@/context/ImageProvider";
 import { useAuth } from "@/hooks/useAuth";
+import type { Image } from "@/lib/types";
 import toast from "react-hot-toast";
 
 interface UseProfileImageOptions {
@@ -14,10 +15,14 @@ interface UseProfileImageOptions {
 
 interface UseProfileImageReturn {
     previewImage: string | null;
+    previewUrl: string | null;
+    image: Image | null;
     uploading: boolean;
     error: string | null;
+    uploadFile: (file: File) => Promise<void>;
     handleFileSelected: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
     removeProfileImage: () => Promise<void>;
+    handleRemove: () => Promise<void>;
     resetError: () => void;
 }
 
@@ -32,6 +37,7 @@ export const useProfileImage = ({
 }: UseProfileImageOptions): UseProfileImageReturn => {
 
     const {
+        image,
         uploading,
         error,
         uploadUserImage,
@@ -47,12 +53,9 @@ export const useProfileImage = ({
     };
 
     // -------------------------------
-    // HANDLE FILE SELECTION
+    // SHARED UPLOAD HANDLER
     // -------------------------------
-    const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
+    const uploadFile = async (file: File) => {
     // Validate size
         if (file.size > maxFileSize) {
             toast.error("File is too large");
@@ -85,6 +88,15 @@ export const useProfileImage = ({
     };
 
     // -------------------------------
+    // HANDLE FILE SELECTION
+    // -------------------------------
+    const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        await uploadFile(file);
+    };
+
+    // -------------------------------
     // REMOVE PROFILE IMAGE
     // -------------------------------
     const handleDeleteProfileImage = async () => {
@@ -103,10 +115,14 @@ export const useProfileImage = ({
 
     return {
         previewImage,
+        previewUrl: previewImage,
+        image,
         uploading,
         error,
+        uploadFile,
         handleFileSelected,
         removeProfileImage: handleDeleteProfileImage,
+        handleRemove: handleDeleteProfileImage,
         resetError,
     };
 };

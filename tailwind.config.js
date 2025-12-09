@@ -1,9 +1,11 @@
+const { heroui } = require("@heroui/theme");
 const config = {
   darkMode: "class",
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
+    "./node_modules/@heroui/theme/dist/components/modal.js",
   ],
   theme: {
     extend: {
@@ -46,7 +48,7 @@ const config = {
       },
     },
   },
-  plugins: [],
+  plugins: [heroui()],
 };
 
 export default config;

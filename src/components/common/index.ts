@@ -4,5 +4,5 @@ export { default as EmptyState } from "./EmptyState";
 export { AddToCartButton } from "./AddToCartButton";
 export { FavoriteButton } from "./FavoriteButton";
 export { default as Pagination } from "./Pagination";
-export { default as ImageHandler } from "./ImageHandler";
+export { ImageHandler } from "./ImageHandler";
 export { ErrorBoundary } from "./ErrorBoundary";

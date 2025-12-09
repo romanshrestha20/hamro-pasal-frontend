@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+// Hook for managing image preview
 export const useImagePreview = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
