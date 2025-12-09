@@ -35,6 +35,7 @@ export const ImageProvider = ({ children }: { children: ReactNode }) => {
     }
 
     setImage(res.data);
+    toast.success("Image uploaded successfully");
     return res.data;
   };
 
@@ -49,6 +50,7 @@ export const ImageProvider = ({ children }: { children: ReactNode }) => {
     }
 
     setImage(null);
+    toast.success("Image removed successfully");
     return true;
   };
 

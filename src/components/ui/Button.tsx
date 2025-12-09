@@ -4,9 +4,10 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
-  variant?: "primary" | "secondary" | "ghost" | "icon";
+  variant?: "primary" | "secondary" | "ghost" | "icon" | "outline";
   size?: "default" | "sm" | "lg";
   loading?: boolean;
   iconLeft?: React.ReactNode;
@@ -46,6 +47,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant === "ghost" && "text-foreground hover:bg-muted",
 
       variant === "icon" && "p-2 rounded-xl hover:bg-muted text-foreground",
+      variant === "outline" &&
+        "border border-border text-foreground hover:bg-accent hover:border-accent-foreground",
 
       // Sizes
       size === "default" && "px-5 py-2.5 text-sm",
