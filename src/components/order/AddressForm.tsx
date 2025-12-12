@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import { Button, Input } from "@/components/ui/index";
 import type { ShippingAddressInput } from "@/lib/types";
 
@@ -38,6 +39,21 @@ export default function AddressForm({
   const handleChange = (field: keyof ShippingAddressInput, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  useEffect(() => {
+    if (!initialData) return;
+
+    setFormData((prev) => ({
+      ...prev,
+         // only fill empty fields (NEVER override user input)
+      fullName: initialData.fullName ?? "",
+      phone: initialData.phone ?? "",
+      address: initialData.address ?? "",
+      city: initialData.city ?? "",
+      postalCode: initialData.postalCode ?? "",
+      country: initialData.country ?? "Nepal",
+    }));
+  }, [initialData]);
 
   return (
     <form onSubmit={handleSubmit} className={`space-y-4 ${className}`}>
