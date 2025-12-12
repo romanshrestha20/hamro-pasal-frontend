@@ -2,6 +2,7 @@
 
 import { X, Package, Truck, CheckCircle } from "lucide-react";
 import { OrderStatus } from "@/lib/types";
+import styles from "./OrderTrackingTimeline.module.css";
 
 const NORMAL_FLOW: OrderStatus[] = [
   "PENDING",
@@ -54,7 +55,7 @@ export default function OrderTrackingTimeline({
         {/* Progress line */}
         <div className="absolute top-5 left-0 w-full h-1 bg-muted -z-10" />
         <div
-          className="absolute top-5 left-0 h-1 bg-primary transition-all duration-500 -z-10"
+          className={styles.progressBar}
           style={{
             width: `${currentIndex >= 0 ? (currentIndex / (NORMAL_FLOW.length - 1)) * 100 : 0}%`,
           }}

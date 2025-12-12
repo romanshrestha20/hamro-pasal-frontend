@@ -1,60 +1,60 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, MapPin, CreditCard, FileText } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 interface CheckoutStepperProps {
-  currentStep: number; // Renamed for clarity (1-based index)
-  steps?: string[];
+  currentStep: number;
 }
 
-export default function CheckoutStepper({
-  currentStep,
-  steps = ["Address", "Payment", "Review"],
-}: CheckoutStepperProps) {
-  return (
-    <div className="w-full py-4">
-      <div className="relative flex items-center justify-between">
-        {/* Background Line */}
-        <div className="absolute left-0 w-full h-1 transform -translate-y-1/2 bg-gray-200 top-1/2 -z-10" />
+const stepIcons = [MapPin, CreditCard, FileText];
 
-        {/* Active Line (Calculated width based on progress) */}
-        <div
-          className="absolute left-0 h-1 transition-all duration-300 transform -translate-y-1/2 bg-blue-600 top-1/2 -z-10"
-          style={{
-            width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`,
-          }}
-        />
+export default function CheckoutStepper({ currentStep }: CheckoutStepperProps) {
+  const steps = ["Address", "Payment", "Review"];
+
+  const progressValue = ((currentStep - 1) / (steps.length - 1)) * 100;
+
+  return (
+    <div className="w-full py-6">
+      <div className="relative flex items-center justify-between">
+
+        {/* Background Progress Line (Behind steps) */}
+        <div className="absolute left-0 z-0 w-full -translate-y-1/2 top-1/2">
+          <Progress value={progressValue} className="h-[3px]" />
+        </div>
 
         {steps.map((label, index) => {
           const stepNum = index + 1;
           const isCompleted = currentStep > stepNum;
           const isActive = currentStep === stepNum;
+          const Icon = stepIcons[index];
 
           return (
-            <div key={label} className="flex flex-col items-center">
-              {/* Step Circle */}
+            <div key={label} className="relative z-10 flex flex-col items-center flex-1">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-colors duration-300 bg-white
-                ${
-                  isActive || isCompleted
-                    ? "border-blue-600 text-blue-600"
-                    : "border-gray-300 text-gray-400"
-                }
-                ${isCompleted ? "bg-blue-600 !text-white border-blue-600" : ""}
+                className={`
+                  w-12 h-12 flex items-center justify-center rounded-full border-2 
+                  text-sm font-semibold transition-all duration-300
+                  ${
+                    isCompleted
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : isActive
+                      ? "border-primary text-primary bg-card shadow-md"
+                      : "border-muted-foreground text-muted-foreground bg-card"
+                  }
                 `}
               >
                 {isCompleted ? (
                   <Check className="w-5 h-5" />
                 ) : (
-                  <span>{stepNum}</span>
+                  <Icon className="w-5 h-5" />
                 )}
               </div>
 
-              {/* Label */}
               <span
-                className={`mt-2 text-sm font-medium ${
-                  isActive ? "text-blue-600" : "text-gray-500"
-                }`}
+                className={`mt-2 text-sm font-medium transition-colors
+                ${isActive ? "text-primary" : "text-muted-foreground"}
+              `}
               >
                 {label}
               </span>
