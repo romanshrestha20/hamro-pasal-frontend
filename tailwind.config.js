@@ -1,4 +1,3 @@
-const { heroui } = require("@heroui/theme");
 const config = {
   darkMode: "class",
   content: [
@@ -48,7 +47,6 @@ const config = {
       },
     },
   },
-  plugins: [heroui()],
 };
 
 export default config;
