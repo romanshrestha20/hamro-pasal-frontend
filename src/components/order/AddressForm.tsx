@@ -43,16 +43,21 @@ export default function AddressForm({
   useEffect(() => {
     if (!initialData) return;
 
-    setFormData((prev) => ({
-      ...prev,
-         // only fill empty fields (NEVER override user input)
-      fullName: initialData.fullName ?? "",
-      phone: initialData.phone ?? "",
-      address: initialData.address ?? "",
-      city: initialData.city ?? "",
-      postalCode: initialData.postalCode ?? "",
-      country: initialData.country ?? "Nepal",
-    }));
+    // Use a timeout to avoid synchronous setState
+    const timer = setTimeout(() => {
+      setFormData((prev) => ({
+        ...prev,
+        // only fill empty fields (NEVER override user input)
+        fullName: initialData.fullName ?? "",
+        phone: initialData.phone ?? "",
+        address: initialData.address ?? "",
+        city: initialData.city ?? "",
+        postalCode: initialData.postalCode ?? "",
+        country: initialData.country ?? "Nepal",
+      }));
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [initialData]);
 
   return (

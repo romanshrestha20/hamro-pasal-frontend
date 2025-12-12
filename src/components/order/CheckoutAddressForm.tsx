@@ -71,6 +71,7 @@ export default function CheckoutAddressForm({
       )}
 
       <AddressForm
+        key={useProfileAddress ? "profile": "manual"}
         initialData={getInitialData()}
         onSubmit={handleSubmit}
         submitLabel="Continue to Payment"
