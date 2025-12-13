@@ -50,7 +50,7 @@ export default function ProfilePage() {
       </div>
     );
   }
-  console.log("user.createdAt raw:", user.createdAt, typeof user.createdAt);
+
 
   /* ================================================================
      Authenticated User

@@ -10,10 +10,9 @@ interface DetailRowProps {
   value: string;
 }
 
-const DetailRow = ({ label, value }: DetailRowProps) => (
+export const DetailRow = ({ label, value }: DetailRowProps) => (
   <p className="text-sm text-muted-foreground">
-    <span className="font-medium text-foreground">{label}:</span>{" "}
-    {value}
+    <span className="font-medium text-foreground">{label}:</span> {value}
   </p>
 );
 
@@ -25,20 +24,46 @@ const ProfileDetails = ({ user, className = "" }: ProfileDetailsProps) => {
       {fullName && <DetailRow label="Name" value={fullName} />}
       {user?.email && <DetailRow label="Email" value={user.email} />}
       {user?.phone && <DetailRow label="Phone" value={user.phone} />}
+      <OptionalDetailRow
+        label="Phone"
+        value={user.phone}
+        warning="Please add your phone number as soon as possible to avoid issues with order delivery."
+      />
 
-      {user.address ? (
-        <DetailRow label="Address" value={user.address} />
-      ) : (
-        <div className="space-y-1">
-          <DetailRow label="Address" value="Not provided" />
-          <p className="text-xs font-medium text-destructive">
-            Please add your address as soon as possible to avoid issues with
-            order delivery.
-          </p>
-        </div>
-      )}
+      <OptionalDetailRow
+        label="Address"
+        value={user.address}
+        warning="Please add your address as soon as possible to avoid issues with order delivery."
+      />
     </div>
   );
 };
 
 export default ProfileDetails;
+
+interface OptionalDetailRowProps {
+  label: string;
+  value?: string | null;
+  warning?: string;
+}
+
+const OptionalDetailRow = ({
+  label,
+  value,
+  warning,
+}: OptionalDetailRowProps) => {
+  if (value) {
+    return <DetailRow label={label} value={value} />;
+  }
+
+  return (
+    <div className="space-y-1">
+      <DetailRow label={label} value="Not provided" />
+      {warning && (
+        <p className="text-xs font-medium text-destructive">
+          {warning}
+        </p>
+      )}
+    </div>
+  );
+};

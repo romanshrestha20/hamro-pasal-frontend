@@ -12,11 +12,13 @@ interface UserFormProps {
   lastName?: string;
   email?: string;
   address?: string;
+  phone?: string;
   onSubmit: (data: {
     firstName: string;
     lastName: string;
     email: string;
     address: string;
+    phone: string;
   }) => Promise<void>;
   onCancel?: () => void;
   loading?: boolean;
@@ -27,6 +29,7 @@ export default function UserForm({
   lastName = "",
   email = "",
   address = "",
+  phone = "",
   onSubmit,
   onCancel = () => {},
   loading = false,
@@ -36,6 +39,7 @@ export default function UserForm({
     lastName,
     email,
     address,
+    phone: phone,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -106,6 +110,13 @@ export default function UserForm({
         value={formData.address ?? ""}
         onChange={handleChange}
         placeholder="Enter address"
+      />
+      <Input
+        label="Phone Number"
+        name="phone"
+        value={formData.phone ?? ""}
+        onChange={handleChange}
+        placeholder="Enter phone number"
       />
 
       <Button type="submit" disabled={isSubmitting || loading}>

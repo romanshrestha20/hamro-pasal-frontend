@@ -6,12 +6,12 @@ interface FormProps {
   children: ReactNode;
   className?: string;
   onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
-  å;
 }
 
-export const Form = ({ children, className = "" }: FormProps) => {
+export const Form = ({ children, className = "", onSubmit }: FormProps) => {
   return (
     <form
+      onSubmit={onSubmit}
       className={`
         w-full space-y-4
         ${className}

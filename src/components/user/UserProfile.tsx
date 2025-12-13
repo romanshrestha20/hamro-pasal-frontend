@@ -3,11 +3,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { User } from "@/lib/types";
-import {
-  ProfileAvatar,
-  ProfileDetails,
-  ProfileImageUploader,
-} from "@/components/user";
+import { ProfileAvatar, ProfileDetails } from "@/components/user";
 import ProfileImageDialog from "@/components/user/ProfileImageDialog";
 import UserForm from "@/components/forms/UserForm";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,7 +12,7 @@ import { useProfileImage } from "@/hooks/userProfileImage";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui";
 import { ChangePasswordDialog } from "../auth/ChangePasswordDialog";
-
+import { div } from "framer-motion/m";
 
 interface UserProfileProps {
   user: User;
@@ -48,17 +44,13 @@ const UserProfile = ({
   /* ----------------------------------------------------
      Image Upload Hook
   ---------------------------------------------------- */
-  const {
-    previewImage,
-    uploading,
-    uploadFile,
-    removeProfileImage,
-  } = useProfileImage({
-    onSuccess: (url) => onProfileUpdated?.(url),
-    onRemove: async () => {
-      await refreshUser();
-    },
-  });
+  const { previewImage, uploading, uploadFile, removeProfileImage } =
+    useProfileImage({
+      onSuccess: (url) => onProfileUpdated?.(url),
+      onRemove: async () => {
+        await refreshUser();
+      },
+    });
   const [openImageDialog, setOpenImageDialog] = useState(false);
 
   const displayImageSrc = previewImage || user.profilePicture;
@@ -110,9 +102,23 @@ const UserProfile = ({
           />
 
           {editable && (
-            <Button variant="outline" onClick={() => setOpenImageDialog(true)}>
-              Change Photo
-            </Button>
+            <div className="flex items-center mt-2">
+              <Button
+                variant="outline"
+                onClick={() => setOpenImageDialog(true)}
+              >
+                Change Photo
+              </Button>
+
+              <Button
+                variant="secondary"
+                className="ml-2"
+                disabled={!user.profilePicture && !previewImage}
+                onClick={handleDeleteUserProfileImage}
+              >
+                Remove Photo
+              </Button>
+            </div>
           )}
 
           {leftActions && <div className="w-full">{leftActions}</div>}
@@ -142,6 +148,7 @@ const UserProfile = ({
                 lastName={user.lastName}
                 email={user.email}
                 address={user.address}
+                phone={user.phone}
                 loading={uploading}
                 onSubmit={handleSubmit}
                 onCancel={() => setIsEditing(false)}
