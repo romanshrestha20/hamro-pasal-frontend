@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/Button";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
-import { Input } from "../ui";
+import toast from "react-hot-toast";
+import { Upload, X, Loader2 } from "lucide-react";
 
 interface ProfileImageDialogProps {
   open: boolean;
@@ -24,7 +24,6 @@ export default function ProfileImageDialog({
   onClose,
   onUpload,
 }: ProfileImageDialogProps) {
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,9 +47,14 @@ export default function ProfileImageDialog({
 
     try {
       await onUpload(file);
-      onClose();
-    } catch (err: any) {
-      setError(err?.message || "Failed to upload image");
+    } catch (err: unknown) {
+      console.error("Error uploading profile image:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred during upload."
+      );
+      setPreview(null);
     } finally {
       setUploading(false);
     }
@@ -71,88 +75,131 @@ export default function ProfileImageDialog({
     multiple: false,
     maxSize: 5 * 1024 * 1024,
     disabled: uploading,
-    onDrop: (acceptedFiles) => {
-      if (acceptedFiles[0]) handleFile(acceptedFiles[0]);
+    onDropAccepted: (acceptedFiles) => {
+      if (acceptedFiles && acceptedFiles[0]) handleFile(acceptedFiles[0]);
+    },
+    onDropRejected: (fileRejections) => {
+      const reason = fileRejections[0]?.errors[0]?.message;
+      if (reason) toast.error(reason);
     },
   });
+
+  const handleNativeDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (uploading) return;
+    const file = e.dataTransfer?.files?.[0];
+    if (file) handleFile(file);
+  };
+
+  const handleNativeDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
 
   /** ------------------------
    * UI
    * ------------------------ */
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="space-y-6">
-        <DialogHeader>
-          <DialogTitle>Change Profile Picture</DialogTitle>
+      <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+          <DialogTitle className="text-xl font-semibold">
+            Upload Profile Photo
+          </DialogTitle>
         </DialogHeader>
 
-        {/* Drag and Drop Area */}
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition
-          ${isDragActive ? "border-primary bg-secondary/30" : "border-muted-foreground/30"}`}
-        >
-          <input {...getInputProps()} />
+        <div className="px-6 py-6 space-y-6">
+          {/* Drag and Drop Area */}
+          <div
+            {...getRootProps()}
+            onDrop={handleNativeDrop}
+            onDragOver={handleNativeDragOver}
+            className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-200
+            ${
+              isDragActive
+                ? "border-primary bg-primary/5 scale-[0.98]"
+                : preview
+                  ? "border-primary/40 bg-primary/5"
+                  : "border-muted-foreground/30 hover:border-primary/50 hover:bg-muted/30"
+            }`}
+          >
+            <input {...getInputProps()} />
 
-          {preview ? (
-            <div className="flex justify-center">
-              <Image
-                src={preview}
-                width={120}
-                height={120}
-                alt="Preview"
-                className="object-cover rounded-full"
-              />
+            {uploading ? (
+              <div className="flex flex-col items-center gap-4 py-8">
+                <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                <p className="text-sm font-medium text-muted-foreground">
+                  Uploading...
+                </p>
+              </div>
+            ) : preview ? (
+              <div className="relative">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative">
+                    <Image
+                      src={preview}
+                      width={160}
+                      height={160}
+                      alt="Preview"
+                      sizes="160px"
+                      priority
+                      unoptimized
+                      className="object-cover border-4 rounded-full shadow-lg border-background"
+                    />
+                    <Button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreview(null);
+                      }}
+                      className="absolute -top-2 -right-2 p-1.5 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors shadow-lg"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <p className="text-sm font-medium text-foreground">
+                    Looking good! Click to change
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-4 py-8">
+                <div className="p-4 rounded-full bg-primary/10">
+                  <Upload className="w-8 h-8 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-base font-medium text-foreground">
+                    Drop your photo here
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    or click to browse
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  PNG, JPG, GIF up to 5MB
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="p-3 border rounded-lg bg-destructive/10 border-destructive/20">
+              <p className="text-sm text-center text-destructive">{error}</p>
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Drag & drop your new profile picture here
-            </p>
           )}
         </div>
 
-        {/* OR Separator */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="px-2 text-muted-foreground bg-background">Or</span>
-          </div>
-        </div>
-
-        {/* Choose File Button */}
-        <div className="text-center">
-          <Button
-            variant="secondary"
-            disabled={uploading}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Choose from files
-          </Button>
-
-          <Input
-            id="profile-file-input"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            ref={fileInputRef}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleFile(file);
-            }}
-          />
-        </div>
-
-        {/* Error Message */}
-        {error && <p className="text-sm text-center text-red-500">{error}</p>}
-
         {/* Footer */}
-        <DialogFooter>
+        <div className="flex justify-end gap-3 px-6 py-4 border-t bg-muted/30">
           <Button variant="ghost" onClick={onClose} disabled={uploading}>
             Cancel
           </Button>
-        </DialogFooter>
+          {preview && (
+            <Button onClick={onClose} disabled={uploading}>
+              Done
+            </Button>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
