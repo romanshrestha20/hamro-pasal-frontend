@@ -31,7 +31,7 @@ export default function ForgotPasswordForm() {
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm()) return;
 
@@ -65,9 +65,7 @@ export default function ForgotPasswordForm() {
           </svg>
         </div>
 
-        <h2 className="text-2xl font-bold text-foreground">
-          Forgot Password?
-        </h2>
+        <h2 className="text-2xl font-bold text-foreground">Forgot Password?</h2>
 
         <p className="text-sm text-muted-foreground">
           Enter your email and we will send you a one-time password.
@@ -75,7 +73,7 @@ export default function ForgotPasswordForm() {
       </div>
 
       {/* Form */}
-      <AuthForm>
+      <AuthForm onSubmit={handleSubmit}>
         <Input
           label="Email Address"
           type="email"
@@ -87,7 +85,7 @@ export default function ForgotPasswordForm() {
 
         <FormError message={displayError ?? undefined} />
 
-        <Button type="submit" disabled={loading} onClick={handleSubmit}>
+        <Button type="submit" disabled={loading}>
           {loading ? "Sending..." : "Send OTP"}
         </Button>
       </AuthForm>

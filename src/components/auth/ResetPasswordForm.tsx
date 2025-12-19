@@ -6,17 +6,19 @@ import { Input } from "../ui/Input";
 import { FormError } from "../ui/FormError";
 import { Button } from "../ui/Button";
 import toast from "react-hot-toast";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export function ResetPasswordForm() {
+interface ResetPasswordFormProps {
+  token?: string;
+}
+export function ResetPasswordForm({ token = "" }: ResetPasswordFormProps) {
   const router = useRouter();
   const { resetPassword, error, loading } = useAuth();
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
-  const params = useSearchParams();
-  const token = params.get("token") ?? "";
+  // token is provided via page searchParams
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setNewPassword(e.target.value);
@@ -25,18 +27,20 @@ export function ResetPasswordForm() {
 
   const validateForm = () => {
     if (newPassword.length < 6)
-      return setValidationError("Password must be at least 6 characters"), false;
+      return (
+        setValidationError("Password must be at least 6 characters"),
+        false
+      );
 
     if (newPassword !== confirmNewPassword)
-      return setValidationError("Passwords do not match"), false;
+      return (setValidationError("Passwords do not match"), false);
 
-    if (!token)
-      return setValidationError("Invalid or missing token"), false;
+    if (!token) return (setValidationError("Invalid or missing token"), false);
 
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!validateForm()) return;
@@ -83,7 +87,7 @@ export function ResetPasswordForm() {
       </div>
 
       {/* FORM */}
-      <AuthForm>
+      <AuthForm onSubmit={handleSubmit}>
         <Input
           type="password"
           label="New Password"
@@ -104,7 +108,7 @@ export function ResetPasswordForm() {
 
         <FormError message={displayError ?? undefined} />
 
-        <Button type="submit" disabled={loading} onClick={handleSubmit}>
+        <Button type="submit" disabled={loading}>
           {loading ? "Resetting..." : "Reset Password"}
         </Button>
       </AuthForm>

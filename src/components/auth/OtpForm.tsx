@@ -4,14 +4,16 @@ import { useState } from "react";
 import { toast } from "react-hot-toast/headless";
 import { useAuth } from "@/hooks/useAuth";
 import { Button, Input } from "../ui";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AuthForm } from "./AuthForm";
 
-export function OtpForm() {
+interface OtpFormProps {
+  email: string;
+}
+
+export function OtpForm({ email }: OtpFormProps) {
   const [otp, setOtp] = useState("");
   const router = useRouter();
-  const params = useSearchParams();
-  const email = params.get("email") || "";
   const { verifyOtp } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,7 +32,7 @@ export function OtpForm() {
     return true;
   };
 
-  const handleOtpVerifySubmit = async (e: React.FormEvent) => {
+  const handleOtpVerifySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm()) return;
 
@@ -63,20 +65,16 @@ export function OtpForm() {
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold text-foreground">
-          Verify OTP
-        </h2>
+        <h2 className="text-2xl font-bold text-foreground">Verify OTP</h2>
 
         <p className="text-sm text-muted-foreground">
           A 6-digit verification code was sent to{" "}
-          <span className="font-semibold text-foreground">
-            {email}
-          </span>.
+          <span className="font-semibold text-foreground">{email}</span>.
         </p>
       </div>
 
       {/* FORM */}
-      <AuthForm>
+      <AuthForm onSubmit={handleOtpVerifySubmit}>
         <Input
           label="One-Time Password (OTP)"
           type="text"
@@ -86,7 +84,7 @@ export function OtpForm() {
           maxLength={6}
         />
 
-        <Button type="submit" onClick={handleOtpVerifySubmit} className="w-full mt-4">
+        <Button type="submit" className="w-full mt-4">
           Verify OTP
         </Button>
 

@@ -5,9 +5,14 @@ import { ReactNode } from "react";
 interface AuthFormProps {
   children: ReactNode;
   className?: string;
+  onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
-export const AuthForm = ({ children, className = "" }: AuthFormProps) => {
+export const AuthForm = ({
+  children,
+  className = "",
+  onSubmit,
+}: AuthFormProps) => {
   return (
     <form
       className={`
@@ -16,6 +21,7 @@ export const AuthForm = ({ children, className = "" }: AuthFormProps) => {
         animate-fade-in
         ${className}
       `}
+      onSubmit={onSubmit}
     >
       {children}
     </form>
