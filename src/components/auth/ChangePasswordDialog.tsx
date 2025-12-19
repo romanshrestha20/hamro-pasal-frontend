@@ -17,15 +17,16 @@ import {
 } from "@/components/ui/dialog";
 
 export function ChangePasswordDialog() {
-  const { changePassword } = useAuth();
+  const { changePassword, user } = useAuth();
   const [open, setOpen] = useState(false);
 
+  const hasPassword = Boolean(user?.hasPassword);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
   const validateForm = () => {
-    if (!oldPassword)
+    if (hasPassword && !oldPassword)
       return (toast.error("Current password is required"), false);
 
     if (newPassword.length < 6)
@@ -42,10 +43,13 @@ export function ChangePasswordDialog() {
     if (!validateForm()) return;
 
     const toastId = toast.loading("Changing password...");
+    const message = hasPassword
+      ? "Password updated successfully"
+      : "Password set successfully";
 
-    await changePassword(oldPassword, newPassword, {
+    await changePassword(hasPassword ? oldPassword : "", newPassword, {
       onSuccess: () => {
-        toast.success("Password changed successfully", { id: toastId });
+        toast.success(message, { id: toastId });
 
         setOldPassword("");
         setNewPassword("");
@@ -78,13 +82,15 @@ export function ChangePasswordDialog() {
 
         {/* FORM */}
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-          <Input
-            label="Current Password"
-            type="password"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            required
-          />
+          {hasPassword && (
+            <Input
+              label="Current Password"
+              type="password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              required
+            />
+          )}
 
           <Input
             label="New Password"

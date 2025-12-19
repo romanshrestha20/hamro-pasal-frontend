@@ -36,7 +36,7 @@ export default function ProductDetailPage() {
       if (result.success && !Array.isArray(result.data)) {
         setProduct(result.data);
       } else {
-        setError(result.error || "Product not found");
+        setError("Product not found");
       }
 
       setLoading(false);
@@ -102,13 +102,6 @@ export default function ProductDetailPage() {
           <ArrowLeft className="w-4 h-4" />
           Back to Products
         </Button>
-
-        {/* Show category path ONLY if product exists */}
-        {product?.categories?.length > 0 && (
-          <p className="mt-3 text-sm text-muted-foreground">
-            {product.categories.map((cat) => cat.name).join(" › ")}
-          </p>
-        )}
       </div>
     );
   }

@@ -8,23 +8,39 @@ const nextConfig: NextConfig = {
       { protocol: "http", hostname: "localhost", port: "5000" },
       { protocol: "http", hostname: "127.0.0.1", port: "4000" },
       { protocol: "http", hostname: "127.0.0.1", port: "5000" },
-      // Fallback match for localhost without explicit port (if needed)
+
+      // Fallback localhost
       { protocol: "http", hostname: "localhost" },
       { protocol: "http", hostname: "127.0.0.1" },
-      // Unsplash for product placeholder images
+
+      // Render backend (🔥 REQUIRED)
+      {
+        protocol: "https",
+        hostname: "hamro-pasal-xdjr.onrender.com",
+        pathname: "/uploads/**",
+      },
+
+      // Unsplash placeholders
       { protocol: "https", hostname: "images.unsplash.com" },
-      // DummyJSON CDN hosts for seeded product images
+
+      // DummyJSON CDN
       { protocol: "https", hostname: "cdn.dummyjson.com" },
       { protocol: "https", hostname: "i.dummyjson.com" },
+
+      // Cloudinary
+      { protocol: "https", hostname: "res.cloudinary.com" },
     ],
   },
+
   async headers() {
     return [
       {
         source: "/:path*",
         headers: [
-          // Allow OAuth popups (e.g., Google) to communicate with the opener
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+          {
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin-allow-popups",
+          },
         ],
       },
     ];

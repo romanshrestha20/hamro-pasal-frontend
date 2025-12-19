@@ -34,9 +34,21 @@ export const ImageProvider = ({ children }: { children: ReactNode }) => {
       return null;
     }
 
-    setImage(res.data);
+    // Backend returns: { success, message, data: { url, publicId } }
+    // apiRequest wraps it: { success, data: backendResponse }
+    // So res.data is the backend response, and res.data.data is the actual image data
+    const imageData = res.data;
+
+    if (!imageData) {
+      const message = "No image data in response";
+      setError(message);
+      toast.error(message);
+      return null;
+    }
+
+    setImage(imageData);
     toast.success("Image uploaded successfully");
-    return res.data;
+    return imageData;
   };
 
   const handleRemove = async () => {

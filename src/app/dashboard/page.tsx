@@ -25,7 +25,6 @@ export default function DashboardPage() {
       <h1>Dashboard</h1>
 
       <Button
-        label="Logout"
         className="text-white bg-red-600 hover:bg-red-700"
         onClick={logout}
       />

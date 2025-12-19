@@ -14,7 +14,7 @@ export const Input = ({ label, error, ...props }: InputProps) => {
 
       <input
         {...props}
-        value={props.value ?? ""}
+        onChange={props.onChange}
         className={`
           w-full px-3 py-2 rounded-lg
           bg-input text-foreground

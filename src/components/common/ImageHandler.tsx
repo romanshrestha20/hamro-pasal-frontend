@@ -19,9 +19,12 @@ export const ImageHandler = ({
   className?: string;
   fallbackText?: string;
 }) => {
+  // Only allow valid URLs: local, blob, or Cloudinary
   const valid =
     src &&
-    (src.startsWith("http") || src.startsWith("/") || src.startsWith("blob"));
+    (src.startsWith("blob") ||
+      src.startsWith("/") ||
+      src.startsWith("https://res.cloudinary.com"));
 
   if (!valid) {
     return (
@@ -37,19 +40,15 @@ export const ImageHandler = ({
     );
   }
 
-  // Check if image is from localhost/127.0.0.1
-  const isLocalhost =
-    src && (src.includes("localhost:") || src.includes("127.0.0.1:"));
-
   return (
     <Image
-      src={src}
+      src={src!}
       alt={alt}
       fill={fill}
       width={fill ? undefined : width}
       height={fill ? undefined : height}
       className={className}
-      unoptimized={isLocalhost}
+      loading="eager" // optional for above-the-fold images
     />
   );
 };

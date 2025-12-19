@@ -10,7 +10,7 @@ export default function ProfilePage() {
 
   const handleProfileImageUpdated = async (newUrl: string) => {
     console.log("Profile image updated:", newUrl);
-    await refreshUser();
+    await refreshUser(); // Refresh user data to reflect new profile image
   };
 
   /* ================================================================

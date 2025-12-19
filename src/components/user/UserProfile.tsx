@@ -46,7 +46,10 @@ const UserProfile = ({
   ---------------------------------------------------- */
   const { previewImage, uploading, uploadFile, removeProfileImage } =
     useProfileImage({
-      onSuccess: (url) => onProfileUpdated?.(url),
+      onSuccess: async (url) => {
+        onProfileUpdated?.(url);
+        await refreshUser(); // Refresh user data to get new Cloudinary URL
+      },
       onRemove: async () => {
         await refreshUser();
       },

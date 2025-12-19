@@ -6,6 +6,7 @@ export interface User {
   phone?: string;
   address?: string;
   profilePicture?: string;
+  hasPassword?: boolean;
   isAdmin: boolean;
   createdAt: string;
   updatedAt: string;

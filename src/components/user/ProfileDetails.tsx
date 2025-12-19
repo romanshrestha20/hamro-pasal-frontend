@@ -23,7 +23,6 @@ const ProfileDetails = ({ user, className = "" }: ProfileDetailsProps) => {
     <div className={`space-y-2 ${className}`}>
       {fullName && <DetailRow label="Name" value={fullName} />}
       {user?.email && <DetailRow label="Email" value={user.email} />}
-      {user?.phone && <DetailRow label="Phone" value={user.phone} />}
       <OptionalDetailRow
         label="Phone"
         value={user.phone}

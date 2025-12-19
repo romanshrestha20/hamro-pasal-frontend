@@ -79,11 +79,13 @@ export const useProfileImage = ({
             toast.error("Image upload failed");
             return;
         }
+        const imageUrl = uploaded.url;
+
+        console.log("Profile image updated:", imageUrl);
 
         // optional callback
         if (onSuccess) {
-            const absoluteUrl = uploaded.url;
-            onSuccess(absoluteUrl);
+            onSuccess(imageUrl);
         }
     };
 
