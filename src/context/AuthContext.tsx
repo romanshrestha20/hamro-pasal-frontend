@@ -497,43 +497,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const changePassword = async (
-    oldPassword: string,
-    newPassword: string,
-    options?: AuthActionOptions
-  ): Promise<AuthResult> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await changePasswordApi({
-        oldPassword,
-        newPassword,
-      });
+const changePassword = async (
+  oldPassword: string,  // <-- make optional
+  newPassword: string,
+  options?: AuthActionOptions
+): Promise<AuthResult> => {
+  setLoading(true);
+  setError(null);
+  try {
+    const payload: any = { newPassword };
+    if (oldPassword) payload.oldPassword = oldPassword; // only include if defined
 
-      if (response.success && response.data) {
-        const message = response.data.message;
-        toast.success(message);
-        options?.onSuccess?.();
-        return { success: true, user: null as any };
-      } else {
-        const message = response.error || "Change password request failed";
-        setError(message);
+    const response = await changePasswordApi(payload);
 
-        options?.onFailure?.(message);
-        return { success: false, error: message };
-      }
-    } catch (err) {
-      const handled = handleApiError(err);
-      setError(handled.message);
-      options?.onFailure?.(handled.message);
-      return {
-        success: false,
-        error: handled.message,
-      };
-    } finally {
-      setLoading(false);
+    if (response.success && response.data) {
+      toast.success(response.data.message);
+      options?.onSuccess?.();
+      return { success: true, user: null as any };
+    } else {
+      const message = response.error || "Change password request failed";
+      setError(message);
+      options?.onFailure?.(message);
+      return { success: false, error: message };
     }
-  };
+  } catch (err) {
+    const handled = handleApiError(err);
+    setError(handled.message);
+    options?.onFailure?.(handled.message);
+    return { success: false, error: handled.message };
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   return (
     <AuthContext.Provider
