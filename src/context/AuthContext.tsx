@@ -405,14 +405,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         const message = response.error || "Forgot password request failed";
         setError(message);
-
+        showErrorToast(message);
         options?.onFailure?.(message);
         return { success: false, error: message };
       }
     } catch (err) {
       const handled = handleApiError(err);
       setError(handled.message);
-
+      showErrorToast(handled);
       options?.onFailure?.(handled.message);
       return {
         success: false,
@@ -445,14 +445,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         const message = response.error || "OTP verification failed";
         setError(message);
+        showErrorToast(message);
         options?.onFailure?.(message);
-
         return { success: false, error: message };
       }
     } catch (err) {
       const handled = handleApiError(err);
       setError(handled.message);
-
+      showErrorToast(handled);
       options?.onFailure?.(handled.message);
       return { success: false, error: handled.message };
     } finally {
@@ -481,13 +481,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         const message = response.error || "Reset password request failed";
         setError(message);
-
+        showErrorToast(message);
         options?.onFailure?.(message);
         return { success: false, error: message };
       }
     } catch (err) {
       const handled = handleApiError(err);
       setError(handled.message);
+      showErrorToast(handled);
       options?.onFailure?.(handled.message);
       return {
         success: false,
