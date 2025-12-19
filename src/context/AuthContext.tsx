@@ -26,7 +26,7 @@ import toast from "react-hot-toast";
 import { CredentialResponse } from "@react-oauth/google";
 import { handleGoogleAuth } from "@/lib/api/auth/googleAuthHandler";
 
-import { handleApiError } from "@/lib/api/error";
+import { handleApiError, showErrorToast } from "@/lib/api/error";
 
 // Typed result for auth actions
 export type AuthResult =
@@ -222,13 +222,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         const message = response.error || "Invalid credentials";
         setError(message);
-
+        showErrorToast(message);
         options?.onFailure?.(message);
         return { success: false, error: message };
       }
     } catch (err) {
       const handled = handleApiError(err);
       setError(handled.message);
+      showErrorToast(handled);
       options?.onFailure?.(handled.message);
       return { success: false, error: handled.message };
     } finally {
@@ -497,40 +498,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-const changePassword = async (
-  oldPassword: string,  // <-- make optional
-  newPassword: string,
-  options?: AuthActionOptions
-): Promise<AuthResult> => {
-  setLoading(true);
-  setError(null);
-  try {
-    const payload: any = { newPassword };
-    if (oldPassword) payload.oldPassword = oldPassword; // only include if defined
+  const changePassword = async (
+    oldPassword: string, // <-- make optional
+    newPassword: string,
+    options?: AuthActionOptions
+  ): Promise<AuthResult> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const payload: any = { newPassword };
+      if (oldPassword) payload.oldPassword = oldPassword; // only include if defined
 
-    const response = await changePasswordApi(payload);
+      const response = await changePasswordApi(payload);
 
-    if (response.success && response.data) {
-      toast.success(response.data.message);
-      options?.onSuccess?.();
-      return { success: true, user: null as any };
-    } else {
-      const message = response.error || "Change password request failed";
-      setError(message);
-      options?.onFailure?.(message);
-      return { success: false, error: message };
+      if (response.success && response.data) {
+        toast.success(response.data.message);
+        options?.onSuccess?.();
+        return { success: true, user: null as any };
+      } else {
+        const message = response.error || "Change password request failed";
+        setError(message);
+        options?.onFailure?.(message);
+        return { success: false, error: message };
+      }
+    } catch (err) {
+      const handled = handleApiError(err);
+      setError(handled.message);
+      options?.onFailure?.(handled.message);
+      return { success: false, error: handled.message };
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    const handled = handleApiError(err);
-    setError(handled.message);
-    options?.onFailure?.(handled.message);
-    return { success: false, error: handled.message };
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+  };
 
   return (
     <AuthContext.Provider

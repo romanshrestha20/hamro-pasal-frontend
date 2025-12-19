@@ -32,10 +32,14 @@ export class AppError extends Error {
   }
 }
 
+/**
+ * Handle API errors and return structured error information.
+ * NOTE: This function returns error data without showing toasts automatically.
+ * Callers should handle toast notifications based on context and user actions.
+ */
 export const handleApiError = (error: unknown): ApiHandledError => {
   // Custom AppError usage in client code
   if (error instanceof AppError) {
-    toast.error(error.message);
     return {
       message: error.message,
       statusCode: error.statusCode,
@@ -52,7 +56,6 @@ export const handleApiError = (error: unknown): ApiHandledError => {
       const message = isTimeout
         ? "Request timed out. Please try again."
         : "Network error. Please check your connection.";
-      toast.error(message);
       return { message, statusCode: 0, code };
     }
 
@@ -62,13 +65,26 @@ export const handleApiError = (error: unknown): ApiHandledError => {
       errors?: Array<{ path?: string | (string | number)[]; message: string }>;
     };
     const data = (error.response.data ?? {}) as ApiErrorResponse;
-    const message = data?.message || defaultMessageForStatus(statusCode);
+    const endpoint = (error.config?.url as string) || "";
+    let message = (data?.message || "").trim();
+
+    // Route-aware defaults: provide clearer messages for common auth endpoints
+    if (!message) {
+      if (statusCode === 401) {
+        if (endpoint.includes("/auth/login")) {
+          message = "Invalid email or password.";
+        } else if (endpoint.includes("/auth/me")) {
+          message = "Please log in to continue.";
+        } else {
+          message = defaultMessageForStatus(statusCode);
+        }
+      } else {
+        message = defaultMessageForStatus(statusCode);
+      }
+    }
 
     // Capture Zod-like validation errors when present
     const fieldErrors = Array.isArray(data?.errors) ? data.errors : undefined;
-
-    // Gentle toasts: avoid duplicating toasts for 401 in silent areas
-    toast.error(message);
 
     return {
       message,
@@ -88,8 +104,16 @@ export const handleApiError = (error: unknown): ApiHandledError => {
   }
 
   const message = "An unexpected error occurred";
-  toast.error(message);
   return { message, statusCode: 500, code: ApiErrorCode.Unknown };
+};
+
+/**
+ * Show error toast with proper context.
+ * Use this in components and API handlers to display user-facing errors.
+ */
+export const showErrorToast = (error: ApiHandledError | string) => {
+  const message = typeof error === "string" ? error : error.message;
+  toast.error(message);
 };
 
 function mapStatusToCode(status: number, hasFieldErrors = false): ApiErrorCode {
@@ -108,7 +132,7 @@ function defaultMessageForStatus(status: number): string {
     case 422:
       return "Invalid input. Please check your entries.";
     case 401:
-      return "Please log in to continue.";
+      return "You are not authorized. Please log in.";
     case 403:
       return "You don't have permission to perform this action.";
     case 404:
