@@ -73,8 +73,7 @@ export const handleApiError = (error: unknown): ApiHandledError => {
       if (statusCode === 401) {
         if (endpoint.includes("/auth/login")) {
           message = "Invalid email or password.";
-        } else if (endpoint.includes("/auth/me")) {
-          message = "Please log in to continue.";
+
         } else {
           message = defaultMessageForStatus(statusCode);
         }
