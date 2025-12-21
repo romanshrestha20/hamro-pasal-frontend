@@ -45,13 +45,11 @@ export default function CategoriesSidebar({
   return (
     <aside className={cn("lg:w-64 shrink-0", className)}>
       <div
-        className="sticky p-4 border rounded-lg shadow-sm  top-20 border-border bg-card text-card-foreground"
+        className="sticky p-4 border rounded-lg shadow-sm top-20 border-border bg-card text-card-foreground"
         role="navigation"
         aria-label="Filter by category"
       >
-        <h2 className="mb-4 text-lg font-semibold text-foreground">
-          Categories
-        </h2>
+
 
         {/* ─────────── States ─────────── */}
         {loading && (
