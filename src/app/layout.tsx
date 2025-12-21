@@ -67,7 +67,6 @@ export default function RootLayout({
                       <NavbarWrapper />
                       <ReviewProvider>
                         <main className="min-h-screen pb-16">{children}</main>
-                        <Analytics />
                         <Footer />
                         <MobileCartBar />
                       </ReviewProvider>
@@ -78,6 +77,7 @@ export default function RootLayout({
             </ProductProvider>
           </AuthProvider>
         </GoogleOAuthProvider>
+        <Analytics />
       </body>
     </html>
   );
