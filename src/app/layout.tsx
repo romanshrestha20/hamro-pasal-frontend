@@ -14,6 +14,7 @@ import { Toaster } from "react-hot-toast";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
 import MobileCartBar from "@/components/cart/MobileCartBar";
 import { Footer } from "@/components/layout/Footer";
+import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -66,6 +67,7 @@ export default function RootLayout({
                       <NavbarWrapper />
                       <ReviewProvider>
                         <main className="min-h-screen pb-16">{children}</main>
+                        <Analytics />
                         <Footer />
                         <MobileCartBar />
                       </ReviewProvider>
