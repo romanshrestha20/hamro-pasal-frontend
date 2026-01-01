@@ -1,8 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+
+  basePath: "/hamro-pasal",
+  assetPrefix: "/hamro-pasal",
+
+
   images: {
     remotePatterns: [
+
       // 🔥 Render backend (uploads)
       {
         protocol: "https",
