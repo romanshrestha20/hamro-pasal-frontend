@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
 
-  basePath: "/hamro-pasal",
-  assetPrefix: "/hamro-pasal",
+  // basePath: "/hamro-pasal",
+  // assetPrefix: "/hamro-pasal",
 
 
   images: {
